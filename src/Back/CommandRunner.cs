@@ -4,11 +4,11 @@ using System.Diagnostics;
 
 public class CommandRunner
 {
-    private readonly ProgramContext context;
+    private readonly ExecutionContext context;
 
     private readonly Logger logger;
 
-    public CommandRunner(ProgramContext context, Logger logger)
+    public CommandRunner(ExecutionContext context, Logger logger)
     {
         this.context = context;
         this.logger = logger;

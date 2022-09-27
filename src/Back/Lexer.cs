@@ -2,13 +2,13 @@ namespace Back;
 
 public class Lexer
 {
-    private readonly ProgramContext context;
+    private readonly ExecutionContext context;
 
     private readonly UsagePrinter usagePrinter;
 
     private readonly Logger logger;
 
-    public Lexer(ProgramContext context, UsagePrinter usagePrinter, Logger logger)
+    public Lexer(ExecutionContext context, UsagePrinter usagePrinter, Logger logger)
     {
         this.context = context;
         this.usagePrinter = usagePrinter;

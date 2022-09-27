@@ -7,7 +7,7 @@ class Program
     static void Main()
     {
         string[] args = Environment.GetCommandLineArgs();
-        var context = new ProgramContext(args, Environment.Exit);
+        var context = new ExecutionContext(args, Environment.Exit);
         var usagePrinter = new UsagePrinter(context);
         var logger = new Logger();
         var lexer = new Lexer(context, usagePrinter, logger);

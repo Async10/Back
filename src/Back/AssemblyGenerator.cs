@@ -69,7 +69,7 @@ public class AssemblyGenerator
 
     private StringBuilder GenerateDump(StringBuilder sb)
     {
-        sb.AppendLine ("    pop rdi");
+        sb.AppendLine ("    pop rdi");  // dump expects argument in rdi register
         sb.AppendLine ("    call dump");
         return sb;
     }

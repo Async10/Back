@@ -2,9 +2,9 @@ namespace Back;
 
 public class UsagePrinter
 {
-    private readonly ProgramContext context;
+    private readonly ExecutionContext context;
 
-    public UsagePrinter(ProgramContext context)
+    public UsagePrinter(ExecutionContext context)
     {
         this.context = context;
     }
