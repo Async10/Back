@@ -7,36 +7,29 @@ class Program
     static void Main()
     {
         string[] args = Environment.GetCommandLineArgs();
-        var context = new ExecutionContext(args, Environment.Exit);
+        var commandLineArgs = CommandLineArgsParser.Parse(args);
+        var context = new ExecutionContext(commandLineArgs, Environment.Exit);
         var usagePrinter = new UsagePrinter(context);
-        var logger = new Logger();
+        var logger = new Logger()
+        {
+            Quiet = commandLineArgs.Quiet,
+        };
+
         var lexer = new Lexer(context, usagePrinter, logger);
         var parser = new Parser();
         var assemblyGenerator = new AssemblyGenerator();
         var commandRunner = new CommandRunner(context, logger);
 
-        string path = string.Empty;
-        var options = new HashSet<string>(new[] { "-r", "--run", "-q", "--quiet" });
-        bool run = false;
-        while (args.Length >= 2)
-        {
-            string arg = args[1];
-            if      (args.Length == 2 && !options.Contains(arg)) path = arg;
-            else if (arg == "-r" || arg == "--run") run = true;
-            else if (arg == "-q" || arg == "--quiet") logger.Quiet = true;
-            args = args.Take(1).Concat(args.Skip(2)).ToArray();
-        }
-
-        if (string.IsNullOrWhiteSpace(path))
+        if (string.IsNullOrWhiteSpace(commandLineArgs.FilePath))
         {
             logger.LogError("No input file provided");
             usagePrinter.Print();
             context.Exit(1);
         }
 
-        var tokens = lexer.LexFile(path);
+        var tokens = lexer.LexFile(commandLineArgs.FilePath);
         var operations = parser.Parse(tokens);
-        var assemblyPath = Path.Combine(Environment.CurrentDirectory, Path.ChangeExtension(path, ".asm"));
+        var assemblyPath = Path.Combine(Environment.CurrentDirectory, Path.ChangeExtension(commandLineArgs.FilePath, ".asm"));
         logger.LogInfo($"Generating assembly file {assemblyPath}");
         var assembly = assemblyGenerator.Generate(operations);
         File.WriteAllText(assemblyPath, assembly);
@@ -57,7 +50,7 @@ class Program
             context.Exit(1);
         }
 
-        if (run)
+        if (commandLineArgs.Run)
         {
             commandRunner.Run(binaryPath);
         }
