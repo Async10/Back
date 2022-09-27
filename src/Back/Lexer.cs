@@ -26,11 +26,11 @@ public class Lexer
         foreach ((int row, string line) in File.ReadLines(path).Enumerate())
         {
             foreach ((int col, string value) in this.LexLine(line))
-                yield return new Token(value, new Location(path, row + 1, col + 1));
+                yield return this.CreateToken(value, new Location(path, row + 1, col + 1));
         }
     }
 
-    private IEnumerable<(int, string)> LexLine(string line)
+    private IEnumerable<(int col, string word)> LexLine(string line)
     {
         int start = 0;
         int col = this.FindNonWhiteSpace(line.Substring(start));
@@ -59,5 +59,15 @@ public class Lexer
         }
 
         return -1;
+    }
+
+    private Token CreateToken(string word, Location location)
+    {
+        if (int.TryParse(word, out var value))
+        {
+            return new IntToken(value, location);
+        }
+
+        return new WordToken(word, location);
     }
 }

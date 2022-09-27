@@ -10,14 +10,23 @@ public class Parser
 
     private Operation Parse(Token token)
     {
-        return (token.Value, int.TryParse(token.Value, out var value)) switch
+        return token switch
         {
-            ("+", _) => new Operation(Opcode.PLUS, token.Location),
-            (".", _) => new Operation(Opcode.DUMP, token.Location),
-            (_, true)=> new Operation(Opcode.PUSH, token.Location, value),
-            _ => throw new ArgumentException($"{token.Location} Unknown token {token.Value}"),
+            IntToken intToken => this.Parse(intToken),
+            WordToken wordToken => this.Parse(wordToken),
+            _ => throw new ArgumentException($"{token.Location} Unknown token"),
         };
     }
+
+    private Operation Parse(IntToken token) =>
+        new Operation(Opcode.PUSH, token.Location, token.Value);
+
+    private Operation Parse(WordToken token) => token switch
+    {
+        { Value: "+" } => new Operation(Opcode.PLUS, token.Location),
+        { Value: "." } => new Operation(Opcode.DUMP, token.Location),
+        _ => throw new ArgumentException($"{token.Location} Unknown token {token.Value}"),
+    };
 
     private string FormatLocation(Location l) =>
         $"({l.Path}:{l.Row}:{l.Col})";
