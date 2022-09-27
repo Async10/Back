@@ -133,4 +133,4 @@ $RECYCLE.BIN/
 _NCrunch*
 
 examples/*
-!examples/*.asm
+!examples/*.back

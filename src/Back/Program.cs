@@ -16,13 +16,14 @@ class Program
         var commandRunner = new CommandRunner(context, logger);
 
         string path = string.Empty;
-        var options = new HashSet<string>(new[] { "-r", "--run" });
+        var options = new HashSet<string>(new[] { "-r", "--run", "-q", "--quiet" });
         bool run = false;
         while (args.Length >= 2)
         {
             string arg = args[1];
             if      (args.Length == 2 && !options.Contains(arg)) path = arg;
             else if (arg == "-r" || arg == "--run") run = true;
+            else if (arg == "-q" || arg == "--quiet") logger.Quiet = true;
             args = args.Take(1).Concat(args.Skip(2)).ToArray();
         }
 

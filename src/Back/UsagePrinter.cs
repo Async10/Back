@@ -13,6 +13,7 @@ public class UsagePrinter
     {
         Console.WriteLine($"Usage: dotnet {this.context.ProgramName} [FILE]");
         Console.WriteLine($"  OPTIONS:");
-        Console.WriteLine($"    -r|--run    Run the program after successful compilation");
+        Console.WriteLine($"    -r|--run        Run the program after successful compilation");
+        Console.WriteLine($"    -q|--quiet      Be quiet, only report errors.");
     }
 }

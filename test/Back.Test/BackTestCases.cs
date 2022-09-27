@@ -14,6 +14,7 @@ public class BackTestCases
         var process = this.StartCompiler();
         process.WaitForExit();
         Assert.Equal(0, process.ExitCode);
+        Assert.Equal("42", process.StandardOutput.ReadToEnd().Split('\n')[0]);
     }
 
     private Process StartCompiler()
@@ -24,7 +25,7 @@ public class BackTestCases
         var process = Process.Start(new ProcessStartInfo
         {
             FileName = "dotnet",
-            Arguments = $"{backPath} -- {filePath}",
+            Arguments = $"{backPath} -- --run --quiet {filePath}",
             RedirectStandardError = true,
             RedirectStandardOutput = true,
         });
