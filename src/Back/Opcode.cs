@@ -3,6 +3,12 @@ namespace Back;
 public enum Opcode
 {
     PUSH,
-    PLUS,
     DUMP,
+    PLUS,
+    SUB,
+    MUL,
+    DIV,
+
+    DIVMOD,
+    MOD,
 }

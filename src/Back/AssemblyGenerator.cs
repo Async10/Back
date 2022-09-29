@@ -36,10 +36,14 @@ public class AssemblyGenerator
         sb.AppendLine("    sub rdx, rax");
         sb.AppendLine("    lea rsi, [rsp+22+rdx]");
         sb.AppendLine("    mov rdx, rcx");
+        sb.AppendLine("    sub rdx, 1");
         sb.AppendLine("    mov rax, 1");
         sb.AppendLine("    syscall");
         sb.AppendLine("    add rsp, 40");
         sb.AppendLine("    ret");
+
+        sb.AppendLine("global _start");
+        sb.AppendLine("_start:");
 
         sb.AppendLine("global _start");
         sb.AppendLine("_start:");
@@ -61,16 +65,69 @@ public class AssemblyGenerator
             (Opcode.PUSH, int val) => this.GeneratePush(sb, val),
             (Opcode.PUSH, _) => throw new ArgumentException($"{op.location} Can only push integers"),
             (Opcode.PLUS, _) => this.GeneratePlus(sb),
+            (Opcode.SUB, _) => this.GenerateSub(sb),
+            (Opcode.MUL, _) => this.GenerateMul(sb),
+            (Opcode.DIV, _) => this.GenerateDiv(sb),
+            (Opcode.DIVMOD, _) => this.GenerateDivMod(sb),
+            (Opcode.MOD, _) => this.GenerateMod(sb),
             (Opcode.DUMP, _) => this.GenerateDump(sb),
             _ => throw new ArgumentException($"Operation ${op.Code} not supported")
         };
         return sb;
     }
 
-    private StringBuilder GenerateDump(StringBuilder sb)
+    private StringBuilder GenerateMod(StringBuilder sb)
     {
-        sb.AppendLine ("    pop rdi");  // dump expects argument in rdi register
-        sb.AppendLine ("    call dump");
+        sb.AppendLine("    xor rdx, rdx");
+        sb.AppendLine("    pop rbx");
+        sb.AppendLine("    pop rax");
+        sb.AppendLine("    div rbx");
+        sb.AppendLine("    push rax");
+        sb.AppendLine("    push rdx");
+        sb.AppendLine("    pop rax");
+        sb.AppendLine("    pop rbx");
+        sb.AppendLine("    push rax");
+        return sb;
+    }
+
+    private StringBuilder GenerateDivMod(StringBuilder sb)
+    {
+        sb.AppendLine("    xor rdx, rdx");
+        sb.AppendLine("    pop rbx");
+        sb.AppendLine("    pop rax");
+        sb.AppendLine("    div rbx");
+        sb.AppendLine("    push rax");
+        sb.AppendLine("    push rdx");
+        return sb;
+    }
+
+    private StringBuilder GenerateDiv(StringBuilder sb)
+    {
+        sb.AppendLine("    xor rdx, rdx");
+        sb.AppendLine("    pop rbx");
+        sb.AppendLine("    pop rax");
+        sb.AppendLine("    div rbx");
+        sb.AppendLine("    push rax");
+        sb.AppendLine("    push rdx");
+        sb.AppendLine("    pop rax");
+        return sb;
+    }
+
+    private StringBuilder GenerateMul(StringBuilder sb)
+    {
+        sb.AppendLine("    pop rbx");
+        sb.AppendLine("    pop rax");
+        sb.AppendLine("    mul rbx");
+        sb.AppendLine("    push rax");
+        return sb;
+    }
+
+    private StringBuilder GenerateSub(StringBuilder sb)
+    {
+        sb.AppendLine("    pop rax");
+        sb.AppendLine("    pop rbx");
+        sb.AppendLine("    sub rbx, rax");
+        sb.AppendLine("    push rbx");
         return sb;
     }
 
@@ -80,6 +137,13 @@ public class AssemblyGenerator
         sb.AppendLine("    pop rbx");
         sb.AppendLine("    add rbx, rax");
         sb.AppendLine("    push rbx");
+        return sb;
+    }
+
+    private StringBuilder GenerateDump(StringBuilder sb)
+    {
+        sb.AppendLine ("    pop rdi");  // dump expects argument in rdi register
+        sb.AppendLine ("    call dump");
         return sb;
     }
 

@@ -24,6 +24,11 @@ public class Parser
     private Operation Parse(WordToken token) => token switch
     {
         { Value: "+" } => new Operation(Opcode.PLUS, token.Location),
+        { Value: "-" } => new Operation(Opcode.SUB, token.Location),
+        { Value: "*" } => new Operation(Opcode.MUL, token.Location),
+        { Value: "/" } => new Operation(Opcode.DIV, token.Location),
+        { Value: "%" } => new Operation(Opcode.MOD, token.Location),
+        { Value: "divmod" } => new Operation(Opcode.DIVMOD, token.Location),
         { Value: "." } => new Operation(Opcode.DUMP, token.Location),
         _ => throw new ArgumentException($"{token.Location} Unknown token {token.Value}"),
     };

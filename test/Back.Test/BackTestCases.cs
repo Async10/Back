@@ -1,27 +1,51 @@
 namespace Back.Test;
 
 using System.Diagnostics;
+using System.Text.Json;
 using Xunit;
 
 public class BackTestCases
 {
     private const string BackRelativePath = "src/Back/bin/Debug/net6.0/Back.dll";
-    private const string FileRelativPath = "examples/test.back";
+    private const string TestCasesDirectoryName = "examples";
 
-    [Fact]
-    public void RunsTestBack()
+    [Theory]
+    [InlineData("arithmetic.back")]
+    public void RunsTestBack(string fileName)
     {
-        var process = this.StartCompiler();
+        var process = this.StartCompiler(fileName);
         process.WaitForExit();
-        Assert.Equal(0, process.ExitCode);
-        Assert.Equal("42", process.StandardOutput.ReadToEnd().Split('\n')[0]);
+        var result = this.GetTestCaseResult(fileName);
+        Assert.Equal(result.ExitCode, process.ExitCode);
+        var actualOutput = process.StandardOutput.ReadToEnd();
+        foreach (var (expectedLine, actualLine) in result.Output.Zip(actualOutput.Split('\n')))
+            Assert.Equal(expectedLine, actualLine);
     }
 
-    private Process StartCompiler()
+    private TestCaseResult GetTestCaseResult(string fileName)
     {
-        string solutionPath = this.GetSolutionPath();
-        string filePath = Path.Combine(solutionPath, FileRelativPath);
-        string backPath = Path.Combine(solutionPath, BackRelativePath);
+        string resultFileName = $"{Path.GetFileNameWithoutExtension(fileName)}.result.json";
+        string json = File.ReadAllText(
+            Path.Combine(this.SolutionPath, TestCasesDirectoryName, resultFileName));
+        return JsonSerializer.Deserialize<TestCaseResult>(json, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        })
+            ?? throw new ArgumentNullException();
+    }
+
+    private string SolutionPath =>
+        Directory.GetParent(Environment.CurrentDirectory)
+            ?.Parent
+            ?.Parent
+            ?.Parent
+            ?.Parent
+            ?.FullName ?? throw new ArgumentNullException();
+
+    private Process StartCompiler(string fileName)
+    {
+        string filePath = Path.Combine(this.SolutionPath, "examples", fileName);
+        string backPath = Path.Combine(this.SolutionPath, BackRelativePath);
         var process = Process.Start(new ProcessStartInfo
         {
             FileName = "dotnet",
@@ -30,15 +54,5 @@ public class BackTestCases
             RedirectStandardOutput = true,
         });
         return process ?? throw new ArgumentNullException();
-    }
-
-    private string GetSolutionPath()
-    {
-        return Directory.GetParent(Environment.CurrentDirectory)
-            ?.Parent
-            ?.Parent
-            ?.Parent
-            ?.Parent
-            ?.FullName ?? throw new ArgumentNullException();
     }
 }
