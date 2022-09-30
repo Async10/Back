@@ -76,6 +76,7 @@ public partial class AssemblyGenerator : IAssemblyGenerator
             (Opcode.DIVMOD, _) => this.GenerateDivMod(sb),
             (Opcode.MOD, _) => this.GenerateMod(sb),
             (Opcode.LESS, _) => this.GenerateLess(sb),
+            (Opcode.LESS_OR_EQUAL, _) => this.GenerateLessOrEqual(sb),
             (Opcode.DROP, _) => this.GenerateDrop(sb),
             (Opcode.DUP, _) => this.GenerateDup(sb),
             (Opcode.OVER, _) => this.GenerateOver(sb),
@@ -84,6 +85,18 @@ public partial class AssemblyGenerator : IAssemblyGenerator
             (Opcode.DUMP, _) => this.GenerateDump(sb),
             _ => throw new ArgumentException($"Operation ${op.Code} not supported")
         };
+        return sb;
+    }
+
+    private StringBuilder GenerateLessOrEqual(StringBuilder sb)
+    {
+        sb.AppendLine( "    pop rbx");
+        sb.AppendLine( "    pop rax");
+        sb.AppendLine($"    mov rcx, {True}");
+        sb.AppendLine( "    xor rdx, rdx");
+        sb.AppendLine( "    cmp rax, rbx");
+        sb.AppendLine( "    cmovle rdx, rcx");
+        sb.AppendLine( "    push rdx");
         return sb;
     }
 

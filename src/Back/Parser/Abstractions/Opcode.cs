@@ -9,6 +9,7 @@ public enum Opcode
     DIVMOD,
     MOD,
     LESS,
+    LESS_OR_EQUAL,
     PUSH,
     DROP,
     DUP,

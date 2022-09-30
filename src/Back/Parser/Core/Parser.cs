@@ -33,6 +33,7 @@ public class Parser : IParser
         { Value: "%" } => new Operation(Opcode.MOD, token.Location),
         { Value: "divmod" } => new Operation(Opcode.DIVMOD, token.Location),
         { Value: "<" } => new Operation(Opcode.LESS, token.Location),
+        { Value: "<=" } => new Operation(Opcode.LESS_OR_EQUAL, token.Location),
         { Value: "drop" } => new Operation(Opcode.DROP, token.Location),
         { Value: "dup" } => new Operation(Opcode.DUP, token.Location),
         { Value: "over" } => new Operation(Opcode.OVER, token.Location),
