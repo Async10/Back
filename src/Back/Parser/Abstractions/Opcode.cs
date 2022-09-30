@@ -10,6 +10,7 @@ public enum Opcode
     MOD,
     LESS,
     LESS_OR_EQUAL,
+    EQUAL,
     PUSH,
     DROP,
     DUP,
