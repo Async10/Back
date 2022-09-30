@@ -35,6 +35,7 @@ public class Parser : IParser
         { Value: "drop" } => new Operation(Opcode.DROP, token.Location),
         { Value: "dup" } => new Operation(Opcode.DUP, token.Location),
         { Value: "over" } => new Operation(Opcode.OVER, token.Location),
+        { Value: "swap" } => new Operation(Opcode.SWAP, token.Location),
         { Value: "." } => new Operation(Opcode.DUMP, token.Location),
         _ => throw new ArgumentException($"{token.Location} Undefined token {token.Value}"),
     };

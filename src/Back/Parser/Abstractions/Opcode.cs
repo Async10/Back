@@ -12,5 +12,6 @@ public enum Opcode
     DROP,
     DUP,
     OVER,
+    SWAP,
     DUMP,
 }
