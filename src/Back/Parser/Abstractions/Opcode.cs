@@ -13,5 +13,6 @@ public enum Opcode
     DUP,
     OVER,
     SWAP,
+    ROT,
     DUMP,
 }

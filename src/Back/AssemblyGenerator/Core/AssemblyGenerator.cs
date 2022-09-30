@@ -77,9 +77,21 @@ public class AssemblyGenerator : IAssemblyGenerator
             (Opcode.DUP, _) => this.GenerateDup(sb),
             (Opcode.OVER, _) => this.GenerateOver(sb),
             (Opcode.SWAP, _) => this.GenerateSwap(sb),
+            (Opcode.ROT, _) => this.GenerateRot(sb),
             (Opcode.DUMP, _) => this.GenerateDump(sb),
             _ => throw new ArgumentException($"Operation ${op.Code} not supported")
         };
+        return sb;
+    }
+
+    private StringBuilder GenerateRot(StringBuilder sb)
+    {
+        sb.AppendLine("    pop rcx");
+        sb.AppendLine("    pop rbx");
+        sb.AppendLine("    pop rax");
+        sb.AppendLine("    push rbx");
+        sb.AppendLine("    push rcx");
+        sb.AppendLine("    push rax");
         return sb;
     }
 

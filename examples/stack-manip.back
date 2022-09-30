@@ -2,3 +2,4 @@
 7 dup . .
 1 2 over . . .
 2 1 swap . .
+1 2 3 rot . . .
