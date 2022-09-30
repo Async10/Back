@@ -22,27 +22,27 @@ public class Parser : IParser
     }
 
     private Operation Parse(IntToken token) =>
-        new Operation(Opcode.PUSH, token.Location, token.Value);
+        new Operation(Opcode.Push, token.Location, token.Value);
 
     private Operation Parse(WordToken token) => token switch
     {
-        { Value: "+" } => new Operation(Opcode.PLUS, token.Location),
-        { Value: "-" } => new Operation(Opcode.SUB, token.Location),
-        { Value: "*" } => new Operation(Opcode.MUL, token.Location),
-        { Value: "/" } => new Operation(Opcode.DIV, token.Location),
-        { Value: "%" } => new Operation(Opcode.MOD, token.Location),
-        { Value: "divmod" } => new Operation(Opcode.DIVMOD, token.Location),
-        { Value: "<" } => new Operation(Opcode.LESS, token.Location),
-        { Value: "<=" } => new Operation(Opcode.LESS_OR_EQUAL, token.Location),
-        { Value: "==" } => new Operation(Opcode.EQUAL, token.Location),
-        { Value: ">" } => new Operation(Opcode.GREATER, token.Location),
-        { Value: ">=" } => new Operation(Opcode.GREATER_OR_EQUAL, token.Location),
-        { Value: "drop" } => new Operation(Opcode.DROP, token.Location),
-        { Value: "dup" } => new Operation(Opcode.DUP, token.Location),
-        { Value: "over" } => new Operation(Opcode.OVER, token.Location),
-        { Value: "swap" } => new Operation(Opcode.SWAP, token.Location),
-        { Value: "rot" } => new Operation(Opcode.ROT, token.Location),
-        { Value: "." } => new Operation(Opcode.DUMP, token.Location),
+        { Value: "+" } => new Operation(Opcode.Plus, token.Location),
+        { Value: "-" } => new Operation(Opcode.Sub, token.Location),
+        { Value: "*" } => new Operation(Opcode.Mul, token.Location),
+        { Value: "/" } => new Operation(Opcode.Div, token.Location),
+        { Value: "%" } => new Operation(Opcode.Mod, token.Location),
+        { Value: "divmod" } => new Operation(Opcode.DivMod, token.Location),
+        { Value: "<" } => new Operation(Opcode.Less, token.Location),
+        { Value: "<=" } => new Operation(Opcode.LessOrEqual, token.Location),
+        { Value: "==" } => new Operation(Opcode.Equal, token.Location),
+        { Value: ">" } => new Operation(Opcode.Greater, token.Location),
+        { Value: ">=" } => new Operation(Opcode.GreaterOrEqual, token.Location),
+        { Value: "drop" } => new Operation(Opcode.Drop, token.Location),
+        { Value: "dup" } => new Operation(Opcode.Dup, token.Location),
+        { Value: "over" } => new Operation(Opcode.Over, token.Location),
+        { Value: "swap" } => new Operation(Opcode.Swap, token.Location),
+        { Value: "rot" } => new Operation(Opcode.Rot, token.Location),
+        { Value: "." } => new Operation(Opcode.Dump, token.Location),
         _ => throw new ArgumentException($"{token.Location} Undefined token {token.Value}"),
     };
 }
