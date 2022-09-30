@@ -130,15 +130,9 @@ public class AssemblyGenerator : IAssemblyGenerator
 
     private StringBuilder GenerateMod(StringBuilder sb)
     {
-        sb.AppendLine("    xor rdx, rdx");
-        sb.AppendLine("    pop rbx");
-        sb.AppendLine("    pop rax");
-        sb.AppendLine("    div rbx");
-        sb.AppendLine("    push rax");
-        sb.AppendLine("    push rdx");
-        sb.AppendLine("    pop rax");
-        sb.AppendLine("    pop rbx");
-        sb.AppendLine("    push rax");
+        this.GenerateDivMod(sb);
+        this.GenerateSwap(sb);
+        this.GenerateDrop(sb);
         return sb;
     }
 
@@ -155,13 +149,8 @@ public class AssemblyGenerator : IAssemblyGenerator
 
     private StringBuilder GenerateDiv(StringBuilder sb)
     {
-        sb.AppendLine("    xor rdx, rdx");
-        sb.AppendLine("    pop rbx");
-        sb.AppendLine("    pop rax");
-        sb.AppendLine("    div rbx");
-        sb.AppendLine("    push rax");
-        sb.AppendLine("    push rdx");
-        sb.AppendLine("    pop rax");
+        this.GenerateDivMod(sb);
+        this.GenerateDrop(sb);
         return sb;
     }
 
