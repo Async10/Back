@@ -4,8 +4,10 @@ using System.Text;
 using Back.AsssemblyGenerator.Abstractions;
 using Back.Parser.Abstractions;
 
-public class AssemblyGenerator : IAssemblyGenerator
+public partial class AssemblyGenerator : IAssemblyGenerator
 {
+    private const byte True = 1;
+
     public string Generate(IEnumerable<Operation> operations)
     {
         var sb = new StringBuilder();
@@ -73,6 +75,7 @@ public class AssemblyGenerator : IAssemblyGenerator
             (Opcode.DIV, _) => this.GenerateDiv(sb),
             (Opcode.DIVMOD, _) => this.GenerateDivMod(sb),
             (Opcode.MOD, _) => this.GenerateMod(sb),
+            (Opcode.LESS, _) => this.GenerateLess(sb),
             (Opcode.DROP, _) => this.GenerateDrop(sb),
             (Opcode.DUP, _) => this.GenerateDup(sb),
             (Opcode.OVER, _) => this.GenerateOver(sb),
@@ -81,6 +84,18 @@ public class AssemblyGenerator : IAssemblyGenerator
             (Opcode.DUMP, _) => this.GenerateDump(sb),
             _ => throw new ArgumentException($"Operation ${op.Code} not supported")
         };
+        return sb;
+    }
+
+    private StringBuilder GenerateLess(StringBuilder sb)
+    {
+        sb.AppendLine( "    pop rbx");
+        sb.AppendLine( "    pop rax");
+        sb.AppendLine($"    mov rcx, {True}");
+        sb.AppendLine( "    xor rdx, rdx");
+        sb.AppendLine( "    cmp rax, rbx");
+        sb.AppendLine( "    cmovs rdx, rcx");
+        sb.AppendLine( "    push rdx");
         return sb;
     }
 

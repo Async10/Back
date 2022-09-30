@@ -8,6 +8,7 @@ public enum Opcode
     DIV,
     DIVMOD,
     MOD,
+    LESS,
     PUSH,
     DROP,
     DUP,
