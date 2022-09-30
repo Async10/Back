@@ -11,6 +11,7 @@ public enum Opcode
     LESS,
     LESS_OR_EQUAL,
     EQUAL,
+    GREATER,
     PUSH,
     DROP,
     DUP,

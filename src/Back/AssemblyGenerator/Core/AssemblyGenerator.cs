@@ -78,6 +78,7 @@ public partial class AssemblyGenerator : IAssemblyGenerator
             (Opcode.LESS, _) => this.GenerateLess(sb),
             (Opcode.LESS_OR_EQUAL, _) => this.GenerateLessOrEqual(sb),
             (Opcode.EQUAL, _) => this.GenerateEqual(sb),
+            (Opcode.GREATER, _) => this.GenerateGreater(sb),
             (Opcode.DROP, _) => this.GenerateDrop(sb),
             (Opcode.DUP, _) => this.GenerateDup(sb),
             (Opcode.OVER, _) => this.GenerateOver(sb),
@@ -88,6 +89,9 @@ public partial class AssemblyGenerator : IAssemblyGenerator
         };
         return sb;
     }
+
+    private StringBuilder GenerateGreater(StringBuilder sb) =>
+        this.GenerateComparison(sb, "cmovg");
 
     private StringBuilder GenerateEqual(StringBuilder sb) =>
         this.GenerateComparison(sb, "cmove");
