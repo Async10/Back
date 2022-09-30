@@ -50,9 +50,6 @@ public partial class AssemblyGenerator : IAssemblyGenerator
         sb.AppendLine("global _start");
         sb.AppendLine("_start:");
 
-        sb.AppendLine("global _start");
-        sb.AppendLine("_start:");
-
         foreach (var op in operations)
             sb = this.Generate(op, sb);
 
@@ -79,6 +76,7 @@ public partial class AssemblyGenerator : IAssemblyGenerator
             (Opcode.LESS_OR_EQUAL, _) => this.GenerateLessOrEqual(sb),
             (Opcode.EQUAL, _) => this.GenerateEqual(sb),
             (Opcode.GREATER, _) => this.GenerateGreater(sb),
+            (Opcode.GREATER_OR_EQUAL, _) => this.GenerateGreaterOrEqual(sb),
             (Opcode.DROP, _) => this.GenerateDrop(sb),
             (Opcode.DUP, _) => this.GenerateDup(sb),
             (Opcode.OVER, _) => this.GenerateOver(sb),
@@ -90,6 +88,8 @@ public partial class AssemblyGenerator : IAssemblyGenerator
         return sb;
     }
 
+    private StringBuilder GenerateGreaterOrEqual(StringBuilder sb) =>
+        this.GenerateComparison(sb, "cmovge");
     private StringBuilder GenerateGreater(StringBuilder sb) =>
         this.GenerateComparison(sb, "cmovg");
 
