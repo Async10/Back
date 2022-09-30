@@ -2,7 +2,6 @@ namespace Back.Parser.Core;
 
 using Back.Lexer.Abstractions;
 using Back.Parser.Abstractions;
-using Back.Shared.Abstractions;
 
 public class Parser : IParser
 {
@@ -34,10 +33,8 @@ public class Parser : IParser
         { Value: "%" } => new Operation(Opcode.MOD, token.Location),
         { Value: "divmod" } => new Operation(Opcode.DIVMOD, token.Location),
         { Value: "drop" } => new Operation(Opcode.DROP, token.Location),
+        { Value: "dup" } => new Operation(Opcode.DUP, token.Location),
         { Value: "." } => new Operation(Opcode.DUMP, token.Location),
         _ => throw new ArgumentException($"{token.Location} Undefined token {token.Value}"),
     };
-
-    private string FormatLocation(Location l) =>
-        $"({l.Path}:{l.Row}:{l.Col})";
 }
