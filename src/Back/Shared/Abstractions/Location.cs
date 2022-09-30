@@ -1,4 +1,4 @@
-namespace Back;
+namespace Back.Shared.Abstractions;
 
 public record Location(string Path, int Row, int Col)
 {

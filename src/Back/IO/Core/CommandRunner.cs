@@ -1,16 +1,14 @@
-namespace Back;
+namespace Back.IO.Core;
 
 using System.Diagnostics;
+using Back.IO.Abstractions;
 
-public class CommandRunner
+public class CommandRunner : ICommandRunner
 {
-    private readonly ExecutionContext context;
+    private readonly ILogger logger;
 
-    private readonly Logger logger;
-
-    public CommandRunner(ExecutionContext context, Logger logger)
+    public CommandRunner(ILogger logger)
     {
-        this.context = context;
         this.logger = logger;
     }
 

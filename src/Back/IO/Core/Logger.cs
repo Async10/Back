@@ -1,10 +1,19 @@
-namespace Back;
+namespace Back.IO.Core;
 
-public class Logger
+using Back.IO.Abstractions;
+
+public class Logger : ILogger
 {
     public const string ErrorLevel = "ERROR";
 
     public const string InfoLevel = "INFO";
+
+    private IOutput output;
+
+    public Logger(IOutput output)
+    {
+        this.output = output;
+    }
 
     public bool Quiet { get; set; } = false;
 
@@ -22,7 +31,7 @@ public class Logger
     {
         if (!this.Quiet || level == ErrorLevel)
         {
-            Console.WriteLine($"{level}: {message}");
+            this.output.WriteLine($"{level}: {message}");
         }
     }
 }

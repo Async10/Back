@@ -1,4 +1,4 @@
-namespace Back;
+namespace Back.Shared.Abstractions;
 
 public static class Extensions
 {

@@ -1,6 +1,10 @@
-namespace Back;
+namespace Back.Parser.Core;
 
-public class Parser
+using Back.Lexer.Abstractions;
+using Back.Parser.Abstractions;
+using Back.Shared.Abstractions;
+
+public class Parser : IParser
 {
     public IEnumerable<Operation> Parse(IEnumerable<Token> tokens)
     {

@@ -1,4 +1,4 @@
-namespace Back;
+namespace Back.Parser.Abstractions;
 
 public enum Opcode
 {

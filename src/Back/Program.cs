@@ -1,58 +1,82 @@
 ﻿namespace Back;
 
-using System.Linq;
+using System;
+using System.Text;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Back.Shared.Abstractions;
+using Back.Compiler.Abstractions;
+using Back.Compiler.DI;
+using Back.IO.DI;
+using Back.Lexer.DI;
+using Back.Parser.DI;
+using Back.AsssemblyGenerator.DI;
+using Back.IO.Abstractions;
 
 class Program
 {
-    static void Main()
+    private static readonly CommandLineArgs Args;
+
+    private static readonly ILogger Logger;
+
+    private static readonly ICompiler Compiler;
+
+    static Program()
     {
-        string[] args = Environment.GetCommandLineArgs();
-        var commandLineArgs = CommandLineArgsParser.Parse(args);
-        var context = new ExecutionContext(commandLineArgs, Environment.Exit);
-        var usagePrinter = new UsagePrinter(context);
-        var logger = new Logger()
-        {
-            Quiet = commandLineArgs.Quiet,
-        };
+        Args = CommandLineArgs.Parse(Environment.GetCommandLineArgs());
+        var services = ConfigureServices(Args);
+        Logger = services.GetRequiredService<ILogger>();
+        Compiler = services.GetRequiredService<ICompiler>();
+    }
 
-        var lexer = new Lexer(context, usagePrinter, logger);
-        var parser = new Parser();
-        var assemblyGenerator = new AssemblyGenerator();
-        var commandRunner = new CommandRunner(context, logger);
-
-        if (string.IsNullOrWhiteSpace(commandLineArgs.FilePath))
+    static int Main()
+    {
+        if (string.IsNullOrWhiteSpace(Args.FilePath))
         {
-            logger.LogError("No input file provided");
-            usagePrinter.Print();
-            context.Exit(1);
+            Logger.LogError("No input file provided");
+            PrintUsage();
+            return 1;
         }
 
-        var tokens = lexer.LexFile(commandLineArgs.FilePath);
-        var operations = parser.Parse(tokens);
-        var assemblyPath = Path.Combine(Environment.CurrentDirectory, Path.ChangeExtension(commandLineArgs.FilePath, ".asm"));
-        logger.LogInfo($"Generating assembly file {assemblyPath}");
-        var assembly = assemblyGenerator.Generate(operations);
-        File.WriteAllText(assemblyPath, assembly);
-        var success = commandRunner.Run("nasm", "-felf64", assemblyPath);
-        if (!success)
+        if (!File.Exists(Args.FilePath))
         {
-            context.Exit(1);
+            Logger.LogError($"File {Args.FilePath} does not exist");
+            return 1;
         }
 
-        var binaryPath = Path.ChangeExtension(assemblyPath, null);
-        success = commandRunner.Run(
-            "ld",
-            "-o",
-            binaryPath,
-            Path.ChangeExtension(assemblyPath, ".o"));
-        if (!success)
+        var lines = File.ReadAllLines(Args.FilePath, Encoding.UTF8);
+        if (Compiler.TryCompile(
+                new SourceFile(Args.FilePath, lines),
+                Args.Run))
         {
-            context.Exit(1);
+            return 0;
         }
 
-        if (commandLineArgs.Run)
-        {
-            commandRunner.Run(binaryPath);
-        }
+        return 1;
+    }
+
+    private static IServiceProvider ConfigureServices(CommandLineArgs args)
+    {
+        return Host.CreateDefaultBuilder()
+            .ConfigureServices((_, services) =>
+                services
+                    .AddIO(logger =>
+                    {
+                        logger.Quiet = true;
+                    })
+                    .AddLexer()
+                    .AddParser()
+                    .AddAssemblyGenerator()
+                    .AddCompiler())
+            .Build()
+            .Services;
+    }
+
+    private static void PrintUsage()
+    {
+        Console.WriteLine($"Usage: dotnet {Args.ProgramName} [FILE]");
+        Console.WriteLine($"  OPTIONS:");
+        Console.WriteLine($"    -r|--run        Run the program after successful compilation");
+        Console.WriteLine($"    -q|--quiet      Be quiet, only report errors.");
     }
 }

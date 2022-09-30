@@ -1,7 +1,10 @@
-namespace Back;
-using System.Text;
+namespace Back.AsssemblyGenerator.Core;
 
-public class AssemblyGenerator
+using System.Text;
+using Back.AsssemblyGenerator.Abstractions;
+using Back.Parser.Abstractions;
+
+public class AssemblyGenerator : IAssemblyGenerator
 {
     public string Generate(IEnumerable<Operation> operations)
     {
@@ -56,7 +59,7 @@ public class AssemblyGenerator
         sb.AppendLine("    syscall");
         return sb.ToString();
     }
-     
+
     private StringBuilder Generate(Operation op, StringBuilder sb)
     {
         sb.AppendLine($"    ; *** {op.Code} ***");
@@ -142,8 +145,8 @@ public class AssemblyGenerator
 
     private StringBuilder GenerateDump(StringBuilder sb)
     {
-        sb.AppendLine ("    pop rdi");  // dump expects argument in rdi register
-        sb.AppendLine ("    call dump");
+        sb.AppendLine("    pop rdi");  // dump expects argument in rdi register
+        sb.AppendLine("    call dump");
         return sb;
     }
 

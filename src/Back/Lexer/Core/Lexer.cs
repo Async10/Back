@@ -1,32 +1,16 @@
-namespace Back;
+namespace Back.Lexer.Core;
 
-public class Lexer
+using Back.Lexer.Abstractions;
+using Back.Shared.Abstractions;
+
+public class Lexer : ILexer
 {
-    private readonly ExecutionContext context;
-
-    private readonly UsagePrinter usagePrinter;
-
-    private readonly Logger logger;
-
-    public Lexer(ExecutionContext context, UsagePrinter usagePrinter, Logger logger)
+    public IEnumerable<Token> LexFile(SourceFile file)
     {
-        this.context = context;
-        this.usagePrinter = usagePrinter;
-        this.logger = logger;
-    }
-
-    public IEnumerable<Token> LexFile(string path)
-    {
-        if (!File.Exists(path))
-        {
-            this.logger.LogError($"file {path} does not exist");
-            this.context.Exit(1);
-        }
-
-        foreach ((int row, string line) in File.ReadLines(path).Enumerate())
+        foreach ((int row, string line) in file.Lines.Enumerate())
         {
             foreach ((int col, string value) in this.LexLine(line))
-                yield return this.CreateToken(value, new Location(path, row + 1, col + 1));
+                yield return this.CreateToken(value, new Location(file.Path, row + 1, col + 1));
         }
     }
 
@@ -40,7 +24,7 @@ public class Lexer
             int length = end != -1 ? end - col : line.Substring(start).Length - col;
             yield return (start + col, line.Substring(start + col, length));
             start += col + length + 1;
-            col = this.FindNonWhiteSpace(start < line.Length ? line.Substring(start): string.Empty);
+            col = this.FindNonWhiteSpace(start < line.Length ? line.Substring(start) : string.Empty);
         }
     }
 

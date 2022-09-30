@@ -1,4 +1,6 @@
-namespace Back;
+namespace Back.Lexer.Abstractions;
+
+using Back.Shared.Abstractions;
 
 public abstract record Token(Location Location);
 

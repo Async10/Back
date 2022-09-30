@@ -1,10 +1,8 @@
 namespace Back;
 
-public static class CommandLineArgsParser
+public record CommandLineArgs(string ProgramName, string FilePath, bool Run, bool Quiet)
 {
-    public record Result(string ProgramName, string FilePath, bool Run, bool Quiet);
-
-    private static readonly Dictionary<string, Func<Result, string, Result>> Reducers = new()
+    private static readonly Dictionary<string, Func<CommandLineArgs, string, CommandLineArgs>> Reducers = new()
     {
         { "-r", (r, arg) => r with { Run = true } },
         { "--run", (r, arg) => r with { Run = true } },
@@ -12,12 +10,12 @@ public static class CommandLineArgsParser
         { "--quiet", (r, arg) => r with { Quiet = true } },
     };
 
-    public static Result Parse(string[] args)
+    public static CommandLineArgs Parse(string[] args)
     {
-        var seed = new Result(args.First(), string.Empty, false, false);
+        var seed = new CommandLineArgs(args[0], string.Empty, false, false);
         return args
             .Skip(1)  // skip program name
-            .Aggregate<string, Result>(
+            .Aggregate<string, CommandLineArgs>(
                 seed,
                 (res, arg) =>
                 {
@@ -26,6 +24,6 @@ public static class CommandLineArgsParser
                 });
     }
 
-    private static Result GetFilePathReducer(Result r, string arg) =>
+    private static CommandLineArgs GetFilePathReducer(CommandLineArgs r, string arg) =>
         r with { FilePath = arg };
 }
