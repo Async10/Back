@@ -18,7 +18,7 @@ public class Parser : IParser
         {
             IntToken intToken => this.Parse(intToken),
             WordToken wordToken => this.Parse(wordToken),
-            _ => throw new ArgumentException($"{token.Location} Unknown token"),
+            _ => throw new ArgumentException($"{token.Location} Undefined token"),
         };
     }
 
@@ -33,8 +33,9 @@ public class Parser : IParser
         { Value: "/" } => new Operation(Opcode.DIV, token.Location),
         { Value: "%" } => new Operation(Opcode.MOD, token.Location),
         { Value: "divmod" } => new Operation(Opcode.DIVMOD, token.Location),
+        { Value: "drop" } => new Operation(Opcode.DROP, token.Location),
         { Value: "." } => new Operation(Opcode.DUMP, token.Location),
-        _ => throw new ArgumentException($"{token.Location} Unknown token {token.Value}"),
+        _ => throw new ArgumentException($"{token.Location} Undefined token {token.Value}"),
     };
 
     private string FormatLocation(Location l) =>

@@ -11,6 +11,7 @@ public class BackTestCases
 
     [Theory]
     [InlineData("arithmetic.back")]
+    [InlineData("stack-manip.back")]
     public void RunsTestBack(string fileName)
     {
         var process = this.StartCompiler(fileName);

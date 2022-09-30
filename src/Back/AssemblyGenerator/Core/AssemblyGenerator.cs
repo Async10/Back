@@ -73,9 +73,16 @@ public class AssemblyGenerator : IAssemblyGenerator
             (Opcode.DIV, _) => this.GenerateDiv(sb),
             (Opcode.DIVMOD, _) => this.GenerateDivMod(sb),
             (Opcode.MOD, _) => this.GenerateMod(sb),
+            (Opcode.DROP, _) => this.GenerateDrop(sb),
             (Opcode.DUMP, _) => this.GenerateDump(sb),
             _ => throw new ArgumentException($"Operation ${op.Code} not supported")
         };
+        return sb;
+    }
+
+    private StringBuilder GenerateDrop(StringBuilder sb)
+    {
+        sb.AppendLine("    pop rax");
         return sb;
     }
 
