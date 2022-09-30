@@ -11,5 +11,6 @@ public enum Opcode
     PUSH,
     DROP,
     DUP,
+    OVER,
     DUMP,
 }

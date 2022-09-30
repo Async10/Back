@@ -34,6 +34,7 @@ public class Parser : IParser
         { Value: "divmod" } => new Operation(Opcode.DIVMOD, token.Location),
         { Value: "drop" } => new Operation(Opcode.DROP, token.Location),
         { Value: "dup" } => new Operation(Opcode.DUP, token.Location),
+        { Value: "over" } => new Operation(Opcode.OVER, token.Location),
         { Value: "." } => new Operation(Opcode.DUMP, token.Location),
         _ => throw new ArgumentException($"{token.Location} Undefined token {token.Value}"),
     };

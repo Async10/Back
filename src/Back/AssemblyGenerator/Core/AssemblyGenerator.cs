@@ -75,9 +75,20 @@ public class AssemblyGenerator : IAssemblyGenerator
             (Opcode.MOD, _) => this.GenerateMod(sb),
             (Opcode.DROP, _) => this.GenerateDrop(sb),
             (Opcode.DUP, _) => this.GenerateDup(sb),
+            (Opcode.OVER, _) => this.GenerateOver(sb),
             (Opcode.DUMP, _) => this.GenerateDump(sb),
             _ => throw new ArgumentException($"Operation ${op.Code} not supported")
         };
+        return sb;
+    }
+
+    private StringBuilder GenerateOver(StringBuilder sb)
+    {
+        sb.AppendLine("    pop rax");
+        sb.AppendLine("    pop rbx");
+        sb.AppendLine("    push rax");
+        sb.AppendLine("    push rbx");
+        sb.AppendLine("    push rax");
         return sb;
     }
 
