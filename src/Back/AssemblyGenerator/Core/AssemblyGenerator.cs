@@ -86,9 +86,9 @@ public class AssemblyGenerator : IAssemblyGenerator
     {
         sb.AppendLine("    pop rax");
         sb.AppendLine("    pop rbx");
-        sb.AppendLine("    push rax");
         sb.AppendLine("    push rbx");
         sb.AppendLine("    push rax");
+        sb.AppendLine("    push rbx");
         return sb;
     }
 
