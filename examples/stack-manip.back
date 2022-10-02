@@ -1,5 +1,5 @@
-42 1 drop .
-7 dup . .
-1 2 over . . .
-2 1 swap . .
-1 2 3 rot . . .
+42 1 drop .         #       n  --
+7 dup . .           #       n  -- n  n
+1 2 over . . .      #    n1 n2 -- n1 n2 n1
+2 1 swap . .        #    n1 n2 -- n2 n1
+1 2 3 rot . . .     # n1 n2 n3 -- n2 n3 n1

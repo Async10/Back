@@ -6,11 +6,13 @@ using Back.Shared.Abstractions;
 
 public class Lexer : ILexer
 {
+    private const string EndOfLineCommentSymbol = "#";
+
     public IEnumerable<Token> LexFile(SourceFile file)
     {
         foreach ((int row, string line) in file.Lines.Enumerate())
         {
-            foreach ((int col, string value) in this.LexLine(line))
+            foreach ((int col, string value) in this.LexLine(line.Split(EndOfLineCommentSymbol)[0]))
                 yield return this.CreateToken(value, new Location(file.Path, row + 1, col + 1));
         }
     }
