@@ -43,6 +43,7 @@ public class Parser : IParser
         { Value: "swap" } => new Operation(Opcode.Swap, token.Location),
         { Value: "rot" } => new Operation(Opcode.Rot, token.Location),
         { Value: "." } => new Operation(Opcode.Dump, token.Location),
+        { Value: "emit" } => new Operation(Opcode.Emit, token.Location),
         _ => throw new ArgumentException($"{token.Location} Undefined token {token.Value}"),
     };
 }

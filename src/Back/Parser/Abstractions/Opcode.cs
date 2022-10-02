@@ -20,4 +20,5 @@ public enum Opcode
     Swap,
     Rot,
     Dump,
+    Emit,
 }

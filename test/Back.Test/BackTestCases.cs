@@ -13,6 +13,7 @@ public class BackTestCases
     [InlineData("arithmetic.back")]
     [InlineData("stack-manip.back")]
     [InlineData("comparison.back")]
+    [InlineData("hello-world.back")]
     public void RunsTestBack(string fileName)
     {
         var process = this.StartCompiler(fileName);

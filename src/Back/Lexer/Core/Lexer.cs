@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 namespace Back.Lexer.Core;
 
 using Back.Lexer.Abstractions;
@@ -16,16 +17,38 @@ public class Lexer : ILexer
 
     private IEnumerable<(int col, string word)> LexLine(string line)
     {
-        int start = 0;
-        int col = this.FindNonWhiteSpace(line.Substring(start));
+        int col = this.FindNonWhiteSpace(line);
         while (col != -1)
         {
-            int end = this.FindWhiteSpace(line.Substring(start));
-            int length = end != -1 ? end - col : line.Substring(start).Length - col;
-            yield return (start + col, line.Substring(start + col, length));
-            start += col + length + 1;
-            col = this.FindNonWhiteSpace(start < line.Length ? line.Substring(start) : string.Empty);
+            int end = this.FindEnd(line.Substring(col));
+            if (end == -1)
+            {
+                yield return (col, line.Substring(col));
+                col = end;
+            }
+            else
+            {
+                yield return (col, line.Substring(col, end));
+                int colAddend = this.FindNonWhiteSpace(line.Substring(col + end));
+                col = colAddend != -1 ? col + end + colAddend : colAddend;
+            }
         }
+    }
+
+    private int FindEnd(string text)
+    {
+        if (text.StartsWith("'"))
+        {
+            return this.FindIndex(
+                text,
+                (ch, idx, text) =>
+                {
+                    return char.IsWhiteSpace(ch) && text[idx - 1] == '\'' && idx != 1;
+                }
+            );
+        }
+
+        return this.FindWhiteSpace(text);
     }
 
     private int FindNonWhiteSpace(string text) =>
@@ -34,22 +57,34 @@ public class Lexer : ILexer
     private int FindWhiteSpace(string text) =>
         this.FindIndex(text, Char.IsWhiteSpace);
 
-    private int FindIndex(string text, Func<char, bool> predicate)
+    private int FindIndex(string text, Func<char, int, string, bool> predicate)
     {
         for (int idx = 0; idx < text.Length; idx++)
         {
-            if (predicate(text[idx]))
+            if (predicate(text[idx], idx, text))
                 return idx;
         }
 
         return -1;
     }
 
+    private int FindIndex(string text, Func<char, bool> predicate) =>
+        this.FindIndex(text, (ch, _, _) => predicate(ch));
+
     private Token CreateToken(string word, Location location)
     {
-        if (int.TryParse(word, out var value))
+        if (word.StartsWith("'"))
         {
-            return new IntToken(value, location);
+            var ch = Regex.Unescape(word.Substring(1, word.Length - 2));
+            if (char.TryParse(ch, out var c))
+            {
+                return new IntToken(c, location);
+            }
+        }
+
+        if (int.TryParse(word, out var i))
+        {
+            return new IntToken(i, location);
         }
 
         return new WordToken(word, location);

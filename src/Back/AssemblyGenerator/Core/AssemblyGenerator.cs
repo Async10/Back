@@ -47,6 +47,18 @@ public partial class AssemblyGenerator : IAssemblyGenerator
         sb.AppendLine("    add rsp, 40");
         sb.AppendLine("    ret");
 
+        sb.AppendLine("emit:");
+        sb.AppendLine("    sub  rsp, 24");
+        sb.AppendLine("    mov  edx, 1");
+        sb.AppendLine("    mov  BYTE [rsp+12], dil");
+        sb.AppendLine("    lea  rsi, [rsp+12]");
+        sb.AppendLine("    mov  edi, 1");
+        sb.AppendLine("    mov  rdx, 1");
+        sb.AppendLine("    mov  rax, 1");
+        sb.AppendLine("    syscall");
+        sb.AppendLine("    add  rsp, 24");
+        sb.AppendLine("    ret");
+
         sb.AppendLine("global _start");
         sb.AppendLine("_start:");
 
@@ -83,8 +95,16 @@ public partial class AssemblyGenerator : IAssemblyGenerator
             (Opcode.Swap, _) => this.GenerateSwap(sb),
             (Opcode.Rot, _) => this.GenerateRot(sb),
             (Opcode.Dump, _) => this.GenerateDump(sb),
+            (Opcode.Emit, _) => this.GenerateEmit(sb),
             _ => throw new ArgumentException($"Operation ${op.Code} not supported")
         };
+        return sb;
+    }
+
+    private StringBuilder GenerateEmit(StringBuilder sb)
+    {
+        sb.AppendLine("    pop rdi");  // emit expects argument in rdi register
+        sb.AppendLine("    call emit");
         return sb;
     }
 
