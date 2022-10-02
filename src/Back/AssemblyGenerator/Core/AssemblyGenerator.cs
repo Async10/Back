@@ -1,3 +1,5 @@
+using System.Security.Cryptography.X509Certificates;
+using System.Reflection.Emit;
 namespace Back.AsssemblyGenerator.Core;
 
 using System.Text;
@@ -63,7 +65,10 @@ public partial class AssemblyGenerator : IAssemblyGenerator
         sb.AppendLine("_start:");
 
         foreach (var op in operations)
+        {
+            sb.AppendLine($"    ; *** {op.Code} ***");
             sb = this.Generate(op, sb);
+        }
 
         sb.AppendLine("    mov rax, 60");
         sb.AppendLine("    xor rdi, rdi");
@@ -71,35 +76,54 @@ public partial class AssemblyGenerator : IAssemblyGenerator
         return sb.ToString();
     }
 
-    private StringBuilder Generate(Operation op, StringBuilder sb)
-    {
-        sb.AppendLine($"    ; *** {op.Code} ***");
-        sb = (op.Code, op.Value) switch
+    private StringBuilder Generate(Operation op, StringBuilder sb) =>
+        op switch
         {
-            (Opcode.Push, int val) => this.GeneratePush(sb, val),
-            (Opcode.Push, _) => throw new ArgumentException($"{op.location} Can only push integers"),
-            (Opcode.Plus, _) => this.GeneratePlus(sb),
-            (Opcode.Sub, _) => this.GenerateSub(sb),
-            (Opcode.Mul, _) => this.GenerateMul(sb),
-            (Opcode.Div, _) => this.GenerateDiv(sb),
-            (Opcode.DivMod, _) => this.GenerateDivMod(sb),
-            (Opcode.Mod, _) => this.GenerateMod(sb),
-            (Opcode.Less, _) => this.GenerateLess(sb),
-            (Opcode.LessOrEqual, _) => this.GenerateLessOrEqual(sb),
-            (Opcode.Equal, _) => this.GenerateEqual(sb),
-            (Opcode.Greater, _) => this.GenerateGreater(sb),
-            (Opcode.GreaterOrEqual, _) => this.GenerateGreaterOrEqual(sb),
-            (Opcode.Drop, _) => this.GenerateDrop(sb),
-            (Opcode.Dup, _) => this.GenerateDup(sb),
-            (Opcode.Over, _) => this.GenerateOver(sb),
-            (Opcode.Swap, _) => this.GenerateSwap(sb),
-            (Opcode.Rot, _) => this.GenerateRot(sb),
-            (Opcode.Dump, _) => this.GenerateDump(sb),
-            (Opcode.Emit, _) => this.GenerateEmit(sb),
-            _ => throw new ArgumentException($"Operation ${op.Code} not supported")
+            IntOperation intOp => intOp.Code switch
+            {
+                Opcode.Push => this.GeneratePush(sb, intOp.Value),
+                _ => throw new ArgumentException($"{intOp.Location} IntOperation {intOp.Code} not supported")
+            },
+            BlockOperation blockOp => blockOp.Code switch
+            {
+                Opcode.If => this.GenerateIf(blockOp, sb),
+                Opcode.End => this.GenerateEnd(blockOp, sb),
+                _ => throw new ArgumentException($"{blockOp.Location} BlockOperation {blockOp.Code} not supported")
+            },
+            _ => op.Code switch
+            {
+                Opcode.Plus => this.GeneratePlus(sb),
+                Opcode.Sub => this.GenerateSub(sb),
+                Opcode.Mul => this.GenerateMul(sb),
+                Opcode.Div => this.GenerateDiv(sb),
+                Opcode.DivMod => this.GenerateDivMod(sb),
+                Opcode.Mod => this.GenerateMod(sb),
+                Opcode.Less => this.GenerateLess(sb),
+                Opcode.LessOrEqual => this.GenerateLessOrEqual(sb),
+                Opcode.Equal => this.GenerateEqual(sb),
+                Opcode.Greater => this.GenerateGreater(sb),
+                Opcode.GreaterOrEqual => this.GenerateGreaterOrEqual(sb),
+                Opcode.Drop => this.GenerateDrop(sb),
+                Opcode.Dup => this.GenerateDup(sb),
+                Opcode.Over => this.GenerateOver(sb),
+                Opcode.Swap => this.GenerateSwap(sb),
+                Opcode.Rot => this.GenerateRot(sb),
+                Opcode.Dump => this.GenerateDump(sb),
+                Opcode.Emit => this.GenerateEmit(sb),
+                _ => throw new ArgumentException($"Operation {op.Code} not supported")
+            }
         };
+
+    private StringBuilder GenerateIf(BlockOperation op, StringBuilder sb)
+    {
+        sb.AppendLine($"    pop rax");
+        sb.AppendLine($"    test rax, rax");
+        sb.AppendLine($"    jz ip{op.Label}");
         return sb;
     }
+
+    private StringBuilder GenerateEnd(BlockOperation op, StringBuilder sb) =>
+        sb.AppendLine($"ip{op.Label}:");
 
     private StringBuilder GenerateEmit(StringBuilder sb)
     {

@@ -21,4 +21,6 @@ public enum Opcode
     Rot,
     Dump,
     Emit,
+    If,
+    End,
 }

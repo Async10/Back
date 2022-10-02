@@ -14,6 +14,7 @@ public class BackTestCases
     [InlineData("stack-manip.back")]
     [InlineData("comparison.back")]
     [InlineData("hello-world.back")]
+    [InlineData("conditionals.back")]
     public void RunsTestBack(string fileName)
     {
         var process = this.StartCompiler(fileName);
