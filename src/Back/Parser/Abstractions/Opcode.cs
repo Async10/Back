@@ -23,4 +23,5 @@ public enum Opcode
     Emit,
     If,
     End,
+    Else,
 }

@@ -1,5 +1,4 @@
 using System.Text;
-using System.Reflection.Emit;
 namespace Back.Parser.Core;
 
 using Back.Lexer.Abstractions;
@@ -19,12 +18,31 @@ public class Parser : IParser
             {
                 instructionPointers.Push((instructionPointer, operation));
             }
-            else if (operation is BlockOperation { Code: Opcode.End } blockOp)
+            else if (operation is LabelOperation { Code: Opcode.Else } elseOp)
             {
                 int ifInstructionPointer = instructionPointers.Pop().Item1;
                 var ifOperation = operations[ifInstructionPointer];
-                operations[ifInstructionPointer] = new BlockOperation(
-                    ifOperation.Code, ifOperation.Location, blockOp.Label);
+                operations[ifInstructionPointer] = new JumpOperation(
+                    ifOperation.Code, ifOperation.Location, elseOp.Label);
+                instructionPointers.Push((instructionPointer, operation));
+            }
+            else if (operation is LabelOperation { Code: Opcode.End } endOp)
+            {
+                int ifOrElseInstructionPointer = instructionPointers.Pop().Item1;
+                var ifOrElseOperation = operations[ifOrElseInstructionPointer];
+                if (ifOrElseOperation is LabelOperation elseOp2)
+                {
+                    operations[ifOrElseInstructionPointer] = new JumpLabelOperation(
+                        elseOp2.Code,
+                        elseOp2.Location,
+                        endOp.Label,
+                        elseOp2.Label);
+                }
+                else
+                {
+                    operations[ifOrElseInstructionPointer] = new JumpOperation(
+                        ifOrElseOperation.Code, ifOrElseOperation.Location, endOp.Label);
+                }
             }
 
             operations[instructionPointer] = operation;
@@ -79,7 +97,8 @@ public class Parser : IParser
         { Value: "." } => new Operation(Opcode.Dump, token.Location),
         { Value: "emit" } => new Operation(Opcode.Emit, token.Location),
         { Value: "if" } => new Operation(Opcode.If, token.Location),
-        { Value: "end" } => new BlockOperation(Opcode.End, token.Location, instructionPointer),
+        { Value: "end" } => new LabelOperation(Opcode.End, token.Location, instructionPointer),
+        { Value: "else" } => new LabelOperation(Opcode.Else, token.Location, instructionPointer),
         _ => throw new ArgumentException($"{token.Location} Undefined token {token.Value}"),
     };
 }

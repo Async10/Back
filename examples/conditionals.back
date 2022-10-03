@@ -1,3 +1,29 @@
 20 21 + 42 <= if
     1 .
+else
+    0 .
+end
+
+19 20 > if
+    1 .
+else
+    0 .
+end
+
+3 dup 1 < if
+    1 .
+else dup end 2 < if
+    2 .
+else dup end 3 < if
+    3 .
+else dup end 4 < if
+    4 .
+end
+
+2 1 > if
+    50 49 <= if
+        1 .
+    else
+        0 .
+    end
 end
