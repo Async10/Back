@@ -1,6 +1,7 @@
 using System.Text;
 namespace Back.Parser.Core;
 
+using System.Collections.Generic;
 using Back.Lexer.Abstractions;
 using Back.Parser.Abstractions;
 using Back.Shared.Abstractions;
@@ -9,61 +10,74 @@ public class Parser : IParser
 {
     public IEnumerable<Operation> Parse(IEnumerable<Token> tokens)
     {
-        Stack<(int, Operation)> instructionPointers = new();
-        Dictionary<int, Operation> operations = new();
-        foreach (var (instructionPointer, token) in tokens.Enumerate())
-        {
-            var operation = this.Parse(instructionPointer, token);
-            if (operation.Code == Opcode.If)
-            {
-                instructionPointers.Push((instructionPointer, operation));
-            }
-            else if (operation is LabelOperation { Code: Opcode.Else } elseOp)
-            {
-                int ifInstructionPointer = instructionPointers.Pop().Item1;
-                var ifOperation = operations[ifInstructionPointer];
-                operations[ifInstructionPointer] = new JumpOperation(
-                    ifOperation.Code, ifOperation.Location, elseOp.Label);
-                instructionPointers.Push((instructionPointer, operation));
-            }
-            else if (operation is LabelOperation { Code: Opcode.End } endOp)
-            {
-                int ifOrElseInstructionPointer = instructionPointers.Pop().Item1;
-                var ifOrElseOperation = operations[ifOrElseInstructionPointer];
-                if (ifOrElseOperation is LabelOperation elseOp2)
-                {
-                    operations[ifOrElseInstructionPointer] = new JumpLabelOperation(
-                        elseOp2.Code,
-                        elseOp2.Location,
-                        endOp.Label,
-                        elseOp2.Label);
-                }
-                else
-                {
-                    operations[ifOrElseInstructionPointer] = new JumpOperation(
-                        ifOrElseOperation.Code, ifOrElseOperation.Location, endOp.Label);
-                }
-            }
+        var operations = tokens.Enumerate().ToDictionary(
+            keySelector: tuple => tuple.Item1,
+            elementSelector: tuple => this.Parse(tuple.Item2, tuple.Item1));
+        return this.CloseBlocks(operations);
+    }
 
-            operations[instructionPointer] = operation;
+    private IEnumerable<Operation> CloseBlocks(IReadOnlyDictionary<int, Operation> operations)
+    {
+        Stack<int> ips = new();
+        Dictionary<int, Operation> result = new();
+
+        void HandleIf(IfOperation op, int ip)
+        {
+            ips.Push(ip);
         }
 
-        if (instructionPointers.Count > 0 )
+        void HandleElse(ElseOperation op, int ip)
+        {
+            int ifIp = ips.Pop();
+            if (result[ifIp] is IfOperation ifOp)
+            {
+                result[ifIp] = ifOp with { ElseOrEndAddress = op.ElseAddress };
+            }
+
+            ips.Push(ip);
+        }
+
+        void HandleEnd(EndOperation op, int ip)
+        {
+            int ifOrElseIp = ips.Pop();
+            if (result[ifOrElseIp] is ElseOperation elseOp)
+            {
+                result[ifOrElseIp] = elseOp with { EndAddress = op.EndAddress };
+            }
+            else if (result[ifOrElseIp] is IfOperation ifOp)
+            {
+                result[ifOrElseIp] = ifOp with { ElseOrEndAddress = op.EndAddress };
+            }
+        }
+
+        foreach (var (ip, op) in operations)
+        {
+            result[ip] = op;
+            if (op is IfOperation ifOp)          HandleIf(ifOp, ip);
+            else if (op is ElseOperation elseOp) HandleElse(elseOp, ip);
+            else if (op is EndOperation endOp)   HandleEnd(endOp, ip);
+        }
+
+        this.EnsureAllBlocksClosed(result, ips);
+
+        return result.Values;
+    }
+
+    private void EnsureAllBlocksClosed(IReadOnlyDictionary<int, Operation> operations, Stack<int> ips)
+    {
+        if (ips.Count > 0)
         {
             var message = new StringBuilder();
-            while (instructionPointers.Count > 0)
+            while (ips.Count > 0)
             {
-                var (_, operation) = instructionPointers.Pop();
-                message.AppendLine($"{operation.Location} unclosed if block");
+                message.AppendLine($"{operations[ips.Pop()].Location} unclosed block");
             }
 
             throw new ArgumentException(message.ToString().Substring(0, message.Length - 1));
         }
-
-        return operations.Values;
     }
 
-    private Operation Parse(int instructionPointer, Token token)
+    private Operation Parse(Token token, int instructionPointer)
     {
         return token switch
         {
@@ -96,9 +110,9 @@ public class Parser : IParser
         { Value: "rot" } => new Operation(Opcode.Rot, token.Location),
         { Value: "." } => new Operation(Opcode.Dump, token.Location),
         { Value: "emit" } => new Operation(Opcode.Emit, token.Location),
-        { Value: "if" } => new Operation(Opcode.If, token.Location),
-        { Value: "end" } => new LabelOperation(Opcode.End, token.Location, instructionPointer),
-        { Value: "else" } => new LabelOperation(Opcode.Else, token.Location, instructionPointer),
+        { Value: "if" } => new IfOperation(token.Location),
+        { Value: "end" } => new EndOperation(token.Location, EndAddress: instructionPointer),
+        { Value: "else" } => new ElseOperation(token.Location, ElseAddress: instructionPointer),
         _ => throw new ArgumentException($"{token.Location} Undefined token {token.Value}"),
     };
 }

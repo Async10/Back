@@ -84,9 +84,9 @@ public partial class AssemblyGenerator : IAssemblyGenerator
                 Opcode.Push => this.GeneratePush(sb, intOp.Value),
                 _ => throw new ArgumentException($"{intOp.Location} IntOperation {intOp.Code} not supported")
             },
-            LabelOperation labelOp => this.GenerateEnd(labelOp, sb),
-            JumpLabelOperation jumpLabelOp => this.GenerateElse(jumpLabelOp, sb),
-            JumpOperation jumpOp => this.GenerateIf(jumpOp, sb),
+            EndOperation endOp => this.GenerateEnd(endOp, sb),
+            ElseOperation elseOp => this.GenerateElse(elseOp, sb),
+            IfOperation ifOp => this.GenerateIf(ifOp, sb),
             _ => op.Code switch
             {
                 Opcode.Plus => this.GeneratePlus(sb),
@@ -111,23 +111,23 @@ public partial class AssemblyGenerator : IAssemblyGenerator
             }
         };
 
-    private StringBuilder GenerateElse(JumpLabelOperation op, StringBuilder sb)
+    private StringBuilder GenerateElse(ElseOperation op, StringBuilder sb)
     {
-        sb.AppendLine($"    jmp ip{op.Address}");
-        sb.AppendLine($"ip{op.Label}:");
+        sb.AppendLine($"    jmp addr_{op.EndAddress}");
+        sb.AppendLine($"addr_{op.ElseAddress}:");
         return sb;
     }
 
-    private StringBuilder GenerateIf(JumpOperation op, StringBuilder sb)
+    private StringBuilder GenerateIf(IfOperation op, StringBuilder sb)
     {
         sb.AppendLine($"    pop rax");
         sb.AppendLine($"    test rax, rax");
-        sb.AppendLine($"    jz ip{op.Address}");
+        sb.AppendLine($"    jz addr_{op.ElseOrEndAddress}");
         return sb;
     }
 
-    private StringBuilder GenerateEnd(LabelOperation op, StringBuilder sb) =>
-        sb.AppendLine($"ip{op.Label}:");
+    private StringBuilder GenerateEnd(EndOperation op, StringBuilder sb) =>
+        sb.AppendLine($"addr_{op.EndAddress}:");
 
     private StringBuilder GenerateEmit(StringBuilder sb)
     {

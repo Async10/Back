@@ -6,8 +6,8 @@ public record Operation(Opcode Code, Location Location);
 
 public record IntOperation(Opcode Code, Location Location, int Value) : Operation(Code, Location);
 
-public record LabelOperation(Opcode Code, Location Location, int Label) : Operation(Code, Location);
+public record EndOperation(Location Location, int EndAddress = -1) : Operation(Opcode.End, Location);
 
-public record JumpOperation(Opcode Code, Location Location, int Address) : Operation(Code, Location);
+public record IfOperation(Location Location, int ElseOrEndAddress = -1) : Operation(Opcode.If, Location);
 
-public record JumpLabelOperation(Opcode Code, Location Location, int Address, int Label): Operation(Code, Location);
+public record ElseOperation(Location Location, int ElseAddress = -1, int EndAddress = -1): Operation(Opcode.Else, Location);
