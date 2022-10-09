@@ -8,4 +8,4 @@ Back compiles to x86 assembly, which again is compiled to a statically-linked li
 
 ## Credits
 
-Thaks to itszsx for the awesome name.
+Thaks to (itszsx)[https://github.com/singiamtel] for the awesome name.
