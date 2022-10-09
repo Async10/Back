@@ -19,6 +19,7 @@ public class BackIntegrationTests
     [InlineData("hello-world.back")]
     [InlineData("if-else.back")]
     [InlineData("while.back")]
+    [InlineData("fizz-buzz.back")]
     public void RunsIntegrationTests(string fileName)
     {
         var process = this.StartCompiler(fileName);
