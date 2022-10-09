@@ -1,8 +1,8 @@
 # TODOS
 
 - [ ] start documenting back
-- [ ] add conditionals
-- [ ] add loops
+- [x] add conditionals
+- [x] add loops
 - [ ] add strings
 - [ ] add procedures
 - [ ] make source code resuable with icludes
