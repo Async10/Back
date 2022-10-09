@@ -1,5 +1,3 @@
-using System.Security.Cryptography.X509Certificates;
-using System.Reflection.Emit;
 namespace Back.AsssemblyGenerator.Core;
 
 using System.Text;
@@ -87,6 +85,8 @@ public partial class AssemblyGenerator : IAssemblyGenerator
             EndOperation endOp => this.GenerateEnd(endOp, sb),
             ElseOperation elseOp => this.GenerateElse(elseOp, sb),
             IfOperation ifOp => this.GenerateIf(ifOp, sb),
+            BeginOperation beginOp => this.GenerateBegin(beginOp, sb),
+            WhileOperation whileOp => this.GenerateWhile(whileOp, sb),
             _ => op.Code switch
             {
                 Opcode.Plus => this.GeneratePlus(sb),
@@ -111,6 +111,20 @@ public partial class AssemblyGenerator : IAssemblyGenerator
             }
         };
 
+    private StringBuilder GenerateWhile(WhileOperation op, StringBuilder sb)
+    {
+        sb.AppendLine($"    pop rax");
+        sb.AppendLine($"    test rax, rax");
+        sb.AppendLine($"    jz addr_{op.EndAddress}");
+        return sb;
+    }
+
+    private StringBuilder GenerateBegin(BeginOperation op, StringBuilder sb)
+    {
+        sb.AppendLine($"addr_{op.BeginAddress}:");
+        return sb;
+    }
+
     private StringBuilder GenerateElse(ElseOperation op, StringBuilder sb)
     {
         sb.AppendLine($"    jmp addr_{op.EndAddress}");
@@ -126,8 +140,15 @@ public partial class AssemblyGenerator : IAssemblyGenerator
         return sb;
     }
 
-    private StringBuilder GenerateEnd(EndOperation op, StringBuilder sb) =>
-        sb.AppendLine($"addr_{op.EndAddress}:");
+    private StringBuilder GenerateEnd(EndOperation op, StringBuilder sb)
+    {
+        if (op.BeginAddress != -1)
+        {
+            sb.AppendLine($"    jmp addr_{op.BeginAddress}");
+        }
+
+        return sb.AppendLine($"addr_{op.EndAddress}:");
+    }
 
     private StringBuilder GenerateEmit(StringBuilder sb)
     {

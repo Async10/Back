@@ -24,4 +24,6 @@ public enum Opcode
     If,
     End,
     Else,
+    Begin,
+    While,
 }

@@ -22,6 +22,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="./IntegrationTestResults/**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="../../src/Back/Back.csproj" />
   </ItemGroup>
 

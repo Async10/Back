@@ -133,5 +133,4 @@ $RECYCLE.BIN/
 _NCrunch*
 
 examples/*
-!examples/*.result.json
 !examples/*.back

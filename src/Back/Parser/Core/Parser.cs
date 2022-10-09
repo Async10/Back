@@ -39,23 +39,43 @@ public class Parser : IParser
 
         void HandleEnd(EndOperation op, int ip)
         {
-            int ifOrElseIp = ips.Pop();
-            if (result[ifOrElseIp] is ElseOperation elseOp)
+            int blockOpIp = ips.Pop();
+            if (result[blockOpIp] is ElseOperation elseOp)
             {
-                result[ifOrElseIp] = elseOp with { EndAddress = op.EndAddress };
+                result[blockOpIp] = elseOp with { EndAddress = op.EndAddress };
             }
-            else if (result[ifOrElseIp] is IfOperation ifOp)
+            else if (result[blockOpIp] is IfOperation ifOp)
             {
-                result[ifOrElseIp] = ifOp with { ElseOrEndAddress = op.EndAddress };
+                result[blockOpIp] = ifOp with { ElseOrEndAddress = op.EndAddress };
             }
+            else if (result[blockOpIp] is WhileOperation whileOp)
+            {
+                result[blockOpIp] = whileOp with { EndAddress = op.EndAddress };
+                if (result[ips.Pop()] is BeginOperation beginOp)
+                {
+                    result[ip] = op with { BeginAddress = beginOp.BeginAddress };
+                }
+            }
+        }
+
+        void HandleBegin(BeginOperation op, int ip)
+        {
+            ips.Push(ip);
+        }
+
+        void HandleWhile(WhileOperation op, int ip)
+        {
+            ips.Push(ip);
         }
 
         foreach (var (ip, op) in operations)
         {
             result[ip] = op;
-            if (op is IfOperation ifOp)          HandleIf(ifOp, ip);
-            else if (op is ElseOperation elseOp) HandleElse(elseOp, ip);
-            else if (op is EndOperation endOp)   HandleEnd(endOp, ip);
+            if (op is IfOperation ifOp)            HandleIf(ifOp, ip);
+            else if (op is ElseOperation elseOp)   HandleElse(elseOp, ip);
+            else if (op is EndOperation endOp)     HandleEnd(endOp, ip);
+            else if (op is BeginOperation beginOp) HandleBegin(beginOp, ip);
+            else if (op is WhileOperation whileOp) HandleWhile(whileOp, ip);
         }
 
         this.EnsureAllBlocksClosed(result, ips);
@@ -113,6 +133,8 @@ public class Parser : IParser
         { Value: "if" } => new IfOperation(token.Location),
         { Value: "end" } => new EndOperation(token.Location, EndAddress: instructionPointer),
         { Value: "else" } => new ElseOperation(token.Location, ElseAddress: instructionPointer),
+        { Value: "begin" } => new BeginOperation(token.Location, BeginAddress: instructionPointer),
+        { Value: "while" } => new WhileOperation(token.Location),
         _ => throw new ArgumentException($"{token.Location} Undefined token {token.Value}"),
     };
 }
