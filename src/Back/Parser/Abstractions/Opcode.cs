@@ -27,4 +27,6 @@ public enum Opcode
     Begin,
     While,
     Mem,
+    Store,
+    Fetch,
 }

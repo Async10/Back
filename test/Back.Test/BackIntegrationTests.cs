@@ -20,6 +20,7 @@ public class BackIntegrationTests
     [InlineData("if-else.back")]
     [InlineData("while.back")]
     [InlineData("fizz-buzz.back")]
+    [InlineData("mem.back")]
     public void RunsIntegrationTests(string fileName)
     {
         var process = this.StartCompiler(fileName);

@@ -136,6 +136,8 @@ public class Parser : IParser
         { Value: "begin" } => new BeginOperation(token.Location, BeginAddress: instructionPointer),
         { Value: "while" } => new WhileOperation(token.Location),
         { Value: "mem" } => new Operation(Opcode.Mem, token.Location),
+        { Value: "!" } => new Operation(Opcode.Store, token.Location),
+        { Value: "@" } => new Operation(Opcode.Fetch, token.Location),
         _ => throw new ArgumentException($"{token.Location} Undefined token {token.Value}"),
     };
 }

@@ -125,9 +125,28 @@ public partial class AssemblyGenerator : IAssemblyGenerator
                 Opcode.Dump => this.GenerateDump(sb),
                 Opcode.Emit => this.GenerateEmit(sb),
                 Opcode.Mem => this.GenerateMem(sb),
+                Opcode.Store => this.GenerateStore(sb),
+                Opcode.Fetch => this.GenerateFetch(sb),
                 _ => throw new ArgumentException($"Operation {op.Code} not supported")
             }
         };
+
+    private StringBuilder GenerateFetch(StringBuilder sb)
+    {
+        sb.AppendLine("    pop rax");
+        sb.AppendLine("    xor rbx, rbx");
+        sb.AppendLine("    mov bl, BYTE [rax]");
+        sb.AppendLine("    push rbx");
+        return sb;
+    }
+
+    private StringBuilder GenerateStore(StringBuilder sb)
+    {
+        sb.AppendLine("    pop rbx");
+        sb.AppendLine("    pop rax");
+        sb.AppendLine("    mov [rax], bl");
+        return sb;
+    }
 
     private StringBuilder GenerateMem(StringBuilder sb)
     {
