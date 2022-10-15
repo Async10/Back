@@ -6,6 +6,7 @@ using Back.Parser.Abstractions;
 
 public partial class AssemblyGenerator : IAssemblyGenerator
 {
+    private const int MemoryCapacity = 640_000;
     private const byte True = 1;
 
     public string Generate(IEnumerable<Operation> operations)
@@ -13,6 +14,47 @@ public partial class AssemblyGenerator : IAssemblyGenerator
         var sb = new StringBuilder();
         sb.AppendLine("segment .text");
 
+        this.GenerateDumpFunction(sb);
+
+        this.GenerateEmitFunction(sb);
+
+        sb.AppendLine("global _start");
+        sb.AppendLine("_start:");
+
+        foreach (var op in operations)
+        {
+            sb.AppendLine($"    ; --- {op.Code} ---");
+            this.Generate(op, sb);
+        }
+
+        sb.AppendLine("    mov rax, 60");
+        sb.AppendLine("    xor rdi, rdi");
+        sb.AppendLine("    syscall");
+
+        sb.AppendLine( "segment .bss");
+        sb.AppendLine($"mem: resb {MemoryCapacity}");
+
+        return sb.ToString();
+    }
+
+    private StringBuilder GenerateEmitFunction(StringBuilder sb)
+    {
+        sb.AppendLine("emit:");
+        sb.AppendLine("    sub  rsp, 24");
+        sb.AppendLine("    mov  edx, 1");
+        sb.AppendLine("    mov  BYTE [rsp+12], dil");
+        sb.AppendLine("    lea  rsi, [rsp+12]");
+        sb.AppendLine("    mov  edi, 1");
+        sb.AppendLine("    mov  rdx, 1");
+        sb.AppendLine("    mov  rax, 1");
+        sb.AppendLine("    syscall");
+        sb.AppendLine("    add  rsp, 24");
+        sb.AppendLine("    ret");
+        return sb;
+    }
+
+    private StringBuilder GenerateDumpFunction(StringBuilder sb)
+    {
         sb.AppendLine("dump:");
         sb.AppendLine("    mov r8, -3689348814741910323");
         sb.AppendLine("    sub rsp, 40");
@@ -46,32 +88,7 @@ public partial class AssemblyGenerator : IAssemblyGenerator
         sb.AppendLine("    syscall");
         sb.AppendLine("    add rsp, 40");
         sb.AppendLine("    ret");
-
-        sb.AppendLine("emit:");
-        sb.AppendLine("    sub  rsp, 24");
-        sb.AppendLine("    mov  edx, 1");
-        sb.AppendLine("    mov  BYTE [rsp+12], dil");
-        sb.AppendLine("    lea  rsi, [rsp+12]");
-        sb.AppendLine("    mov  edi, 1");
-        sb.AppendLine("    mov  rdx, 1");
-        sb.AppendLine("    mov  rax, 1");
-        sb.AppendLine("    syscall");
-        sb.AppendLine("    add  rsp, 24");
-        sb.AppendLine("    ret");
-
-        sb.AppendLine("global _start");
-        sb.AppendLine("_start:");
-
-        foreach (var op in operations)
-        {
-            sb.AppendLine($"    ; *** {op.Code} ***");
-            sb = this.Generate(op, sb);
-        }
-
-        sb.AppendLine("    mov rax, 60");
-        sb.AppendLine("    xor rdi, rdi");
-        sb.AppendLine("    syscall");
-        return sb.ToString();
+        return sb;
     }
 
     private StringBuilder Generate(Operation op, StringBuilder sb) =>
@@ -107,9 +124,16 @@ public partial class AssemblyGenerator : IAssemblyGenerator
                 Opcode.Rot => this.GenerateRot(sb),
                 Opcode.Dump => this.GenerateDump(sb),
                 Opcode.Emit => this.GenerateEmit(sb),
+                Opcode.Mem => this.GenerateMem(sb),
                 _ => throw new ArgumentException($"Operation {op.Code} not supported")
             }
         };
+
+    private StringBuilder GenerateMem(StringBuilder sb)
+    {
+        sb.AppendLine("    push mem");
+        return sb;
+    }
 
     private StringBuilder GenerateWhile(WhileOperation op, StringBuilder sb)
     {

@@ -26,4 +26,5 @@ public enum Opcode
     Else,
     Begin,
     While,
+    Mem,
 }
