@@ -102,10 +102,14 @@ public class Parser : IParser
         return token switch
         {
             IntToken intToken => this.Parse(intToken),
+            StringToken stringToken => this.Parse(stringToken),
             WordToken wordToken => this.Parse(wordToken, instructionPointer),
             _ => throw new ArgumentException($"{token.Location} Undefined token"),
         };
     }
+
+    private Operation Parse(StringToken token) =>
+        new StringOperation(Opcode.Push, token.Location, token.Value);
 
     private Operation Parse(IntToken token) =>
         new IntOperation(Opcode.Push, token.Location, token.Value);
@@ -121,6 +125,7 @@ public class Parser : IParser
         { Value: "<" } => new Operation(Opcode.Less, token.Location),
         { Value: "<=" } => new Operation(Opcode.LessOrEqual, token.Location),
         { Value: "==" } => new Operation(Opcode.Equal, token.Location),
+        { Value: "<>" } => new Operation(Opcode.NotEqual, token.Location),
         { Value: ">" } => new Operation(Opcode.Greater, token.Location),
         { Value: ">=" } => new Operation(Opcode.GreaterOrEqual, token.Location),
         { Value: "drop" } => new Operation(Opcode.Drop, token.Location),
@@ -135,6 +140,10 @@ public class Parser : IParser
         { Value: "else" } => new ElseOperation(token.Location, ElseAddress: instructionPointer),
         { Value: "begin" } => new BeginOperation(token.Location, BeginAddress: instructionPointer),
         { Value: "while" } => new WhileOperation(token.Location),
-        _ => throw new ArgumentException($"{token.Location} Undefined token {token.Value}"),
+        { Value: "mem" } => new Operation(Opcode.Mem, token.Location),
+        { Value: "!" } => new Operation(Opcode.Store, token.Location),
+        { Value: "@" } => new Operation(Opcode.Fetch, token.Location),
+        { Value: "syscall3" } => new Operation(Opcode.Syscall3, token.Location),
+        _ => throw new ArgumentException($"{token.Location} Undefined token '{token.Value}'"),
     };
 }

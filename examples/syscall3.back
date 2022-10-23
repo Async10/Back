@@ -1,0 +1,16 @@
+# write "abc" into the memory
+mem 0 + 'a' !
+mem 1 + 'b' !
+mem 2 + 'c' !
+
+# increment each character by 1 making it "bcd"
+mem 0 + dup @ 1 + !
+mem 1 + dup @ 1 + !
+mem 2 + dup @ 1 + !
+
+# print "bcd"
+1        # syscall number – write
+1        # file descriptor – stdout
+mem      # buffer
+3        # count – number of bytes
+syscall3 # perform syscall with 3 arguments

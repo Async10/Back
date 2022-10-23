@@ -11,6 +11,7 @@ public enum Opcode
     Less,
     LessOrEqual,
     Equal,
+    NotEqual,
     Greater,
     GreaterOrEqual,
     Push,
@@ -26,4 +27,8 @@ public enum Opcode
     Else,
     Begin,
     While,
+    Mem,
+    Store,
+    Fetch,
+    Syscall3,
 }

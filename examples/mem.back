@@ -1,0 +1,6 @@
+mem     # push adress of memory on the stack
+12      # push value 12 on the stack
+!       # store value 12 in memory
+mem     # push adress of memory on the stack
+@       # fetch value of memory
+.       # dump top of the stack

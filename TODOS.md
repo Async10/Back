@@ -3,6 +3,7 @@
 - [ ] start documenting back
 - [x] add conditionals
 - [x] add loops
+- [ ] reading and writing to memory
 - [ ] add strings
 - [ ] add procedures
 - [ ] make source code resuable with icludes
