@@ -9,3 +9,6 @@ public record IntToken(int Value, Location Location)
 
 public record WordToken(string Value, Location Location)
     : Token(Location);
+
+public record StringToken(string Value, Location Location)
+    : Token(Location);

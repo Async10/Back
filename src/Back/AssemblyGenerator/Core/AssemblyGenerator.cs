@@ -3,11 +3,14 @@ namespace Back.AsssemblyGenerator.Core;
 using System.Text;
 using Back.AsssemblyGenerator.Abstractions;
 using Back.Parser.Abstractions;
+using Back.Shared.Abstractions;
 
 public partial class AssemblyGenerator : IAssemblyGenerator
 {
     private const int MemoryCapacity = 640_000;
     private const byte True = 1;
+
+    private readonly IList<string> stringLiterals = new List<string>();
 
     public string Generate(IEnumerable<Operation> operations)
     {
@@ -15,21 +18,23 @@ public partial class AssemblyGenerator : IAssemblyGenerator
         sb.AppendLine("segment .text");
 
         this.GenerateDumpFunction(sb);
-
         this.GenerateEmitFunction(sb);
 
         sb.AppendLine("global _start");
         sb.AppendLine("_start:");
 
         foreach (var op in operations)
-        {
-            sb.AppendLine($"    ; --- {op.Code} ---");
             this.Generate(op, sb);
-        }
 
+        // Exit program
         sb.AppendLine("    mov rax, 60");
         sb.AppendLine("    xor rdi, rdi");
         sb.AppendLine("    syscall");
+
+        // Allocate string literals
+        sb.AppendLine( "segment .data");
+        foreach (var (idx, stringLiteral) in this.stringLiterals.Enumerate())
+            sb.AppendLine($"str_{idx}: db {string.Join(',', this.ConvertToHexValues(stringLiteral))}");
 
         sb.AppendLine( "segment .bss");
         sb.AppendLine($"mem: resb {MemoryCapacity}");
@@ -91,13 +96,20 @@ public partial class AssemblyGenerator : IAssemblyGenerator
         return sb;
     }
 
-    private StringBuilder Generate(Operation op, StringBuilder sb) =>
-        op switch
+    private StringBuilder Generate(Operation op, StringBuilder sb)
+    {
+        sb.AppendLine($"    ; --- {op.Code} ---");
+        return op switch
         {
             IntOperation intOp => intOp.Code switch
             {
-                Opcode.Push => this.GeneratePush(sb, intOp.Value),
+                Opcode.Push => this.GeneratePushInt(sb, intOp.Value),
                 _ => throw new ArgumentException($"{intOp.Location} IntOperation {intOp.Code} not supported")
+            },
+            StringOperation stringOp => stringOp.Code switch
+            {
+                Opcode.Push => this.GeneratePushString(sb, stringOp.Value),
+                _ => throw new ArgumentException($"{stringOp.Location} StingOperation {stringOp.Code} not suppoerted")
             },
             EndOperation endOp => this.GenerateEnd(endOp, sb),
             ElseOperation elseOp => this.GenerateElse(elseOp, sb),
@@ -129,9 +141,19 @@ public partial class AssemblyGenerator : IAssemblyGenerator
                 Opcode.Store => this.GenerateStore(sb),
                 Opcode.Fetch => this.GenerateFetch(sb),
                 Opcode.Syscall3 => this.GenerateSyscall3(sb),
-                _ => throw new ArgumentException($"Operation {op.Code} not supported")
+                _ => throw new ArgumentException($"{op.Location} Operation {op.Code} for value not supported")
             }
         };
+    }
+
+    private StringBuilder GeneratePushString(StringBuilder sb, string value)
+    {
+        sb.AppendLine($"    push str_{this.stringLiterals.Count}");
+        sb.AppendLine($"    mov rax, {value.Length}");
+        sb.AppendLine($"    push rax");
+        this.stringLiterals.Add(value);
+        return sb;
+    }
 
     private StringBuilder GenerateSyscall3(StringBuilder sb)
     {
@@ -345,6 +367,9 @@ public partial class AssemblyGenerator : IAssemblyGenerator
         return sb;
     }
 
-    private StringBuilder GeneratePush(StringBuilder sb, int value) =>
+    private StringBuilder GeneratePushInt(StringBuilder sb, int value) =>
         sb.AppendLine($"    push {value}");
+
+    private IEnumerable<string> ConvertToHexValues(string text) =>
+        Encoding.UTF8.GetBytes(text).Select(b => $"0x{b.ToString("X2")}");
 }

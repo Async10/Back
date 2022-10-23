@@ -44,10 +44,15 @@ public class Lexer : ILexer
             return this.FindIndex(
                 text,
                 (ch, idx, text) =>
-                {
-                    return char.IsWhiteSpace(ch) && text[idx - 1] == '\'' && idx != 1;
-                }
-            );
+                    char.IsWhiteSpace(ch) && text[idx - 1] == '\'' && idx != 1);
+        }
+
+        if (text.StartsWith('"'))
+        {
+            return this.FindIndex(
+                text,
+                (ch, idx, text) =>
+                    char.IsWhiteSpace(ch) && text[idx - 1] == '"' && idx != 1);
         }
 
         return this.FindWhiteSpace(text);
@@ -77,11 +82,22 @@ public class Lexer : ILexer
     {
         if (word.StartsWith("'"))
         {
-            var ch = Regex.Unescape(word.Substring(1, word.Length - 2));
-            if (char.TryParse(ch, out var c))
+            if (char.TryParse(this.Unescape(word), out var aChar))
             {
-                return new IntToken(c, location);
+                return new IntToken(aChar, location);
             }
+
+            throw new ArgumentException($"{location} {word} is not a char");
+        }
+
+        if (word.StartsWith('"'))
+        {
+            if (word.EndsWith('"'))
+            {
+                return new StringToken(this.Unescape(word), location);
+            }
+
+            throw new ArgumentException($"{location} Unclosed string literal");
         }
 
         if (int.TryParse(word, out var i))
@@ -91,4 +107,7 @@ public class Lexer : ILexer
 
         return new WordToken(word, location);
     }
+
+    private string Unescape(string word) =>
+        Regex.Unescape(word.Substring(1, word.Length - 2));
 }

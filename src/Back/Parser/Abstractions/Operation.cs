@@ -6,6 +6,8 @@ public record Operation(Opcode Code, Location Location);
 
 public record IntOperation(Opcode Code, Location Location, int Value) : Operation(Code, Location);
 
+public record StringOperation(Opcode Code, Location Location, string Value) : Operation(Code, Location);
+
 public record EndOperation(Location Location, int EndAddress = -1, int BeginAddress = -1) : Operation(Opcode.End, Location);
 
 public record IfOperation(Location Location, int ElseOrEndAddress = -1) : Operation(Opcode.If, Location);

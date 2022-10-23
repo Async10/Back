@@ -22,6 +22,7 @@ public class BackIntegrationTests
     [InlineData("fizz-buzz.back")]
     [InlineData("mem.back")]
     [InlineData("syscall3.back")]
+    [InlineData("string.back")]
     public void RunsIntegrationTests(string fileName)
     {
         var process = this.StartCompiler(fileName);

@@ -102,10 +102,14 @@ public class Parser : IParser
         return token switch
         {
             IntToken intToken => this.Parse(intToken),
+            StringToken stringToken => this.Parse(stringToken),
             WordToken wordToken => this.Parse(wordToken, instructionPointer),
             _ => throw new ArgumentException($"{token.Location} Undefined token"),
         };
     }
+
+    private Operation Parse(StringToken token) =>
+        new StringOperation(Opcode.Push, token.Location, token.Value);
 
     private Operation Parse(IntToken token) =>
         new IntOperation(Opcode.Push, token.Location, token.Value);
