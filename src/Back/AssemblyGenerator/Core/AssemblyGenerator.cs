@@ -115,6 +115,7 @@ public partial class AssemblyGenerator : IAssemblyGenerator
                 Opcode.Less => this.GenerateLess(sb),
                 Opcode.LessOrEqual => this.GenerateLessOrEqual(sb),
                 Opcode.Equal => this.GenerateEqual(sb),
+                Opcode.NotEqual => this.GenerateNotEqual(sb),
                 Opcode.Greater => this.GenerateGreater(sb),
                 Opcode.GreaterOrEqual => this.GenerateGreaterOrEqual(sb),
                 Opcode.Drop => this.GenerateDrop(sb),
@@ -207,6 +208,9 @@ public partial class AssemblyGenerator : IAssemblyGenerator
 
     private StringBuilder GenerateEqual(StringBuilder sb) =>
         this.GenerateComparison(sb, "cmove");
+
+    private StringBuilder GenerateNotEqual(StringBuilder sb) =>
+        this.GenerateComparison(sb, "cmovne");
 
     private StringBuilder GenerateLessOrEqual(StringBuilder sb) =>
         this.GenerateComparison(sb, "cmovle");

@@ -121,6 +121,7 @@ public class Parser : IParser
         { Value: "<" } => new Operation(Opcode.Less, token.Location),
         { Value: "<=" } => new Operation(Opcode.LessOrEqual, token.Location),
         { Value: "==" } => new Operation(Opcode.Equal, token.Location),
+        { Value: "<>" } => new Operation(Opcode.NotEqual, token.Location),
         { Value: ">" } => new Operation(Opcode.Greater, token.Location),
         { Value: ">=" } => new Operation(Opcode.GreaterOrEqual, token.Location),
         { Value: "drop" } => new Operation(Opcode.Drop, token.Location),
@@ -138,6 +139,6 @@ public class Parser : IParser
         { Value: "mem" } => new Operation(Opcode.Mem, token.Location),
         { Value: "!" } => new Operation(Opcode.Store, token.Location),
         { Value: "@" } => new Operation(Opcode.Fetch, token.Location),
-        _ => throw new ArgumentException($"{token.Location} Undefined token {token.Value}"),
+        _ => throw new ArgumentException($"{token.Location} Undefined token '{token.Value}'"),
     };
 }

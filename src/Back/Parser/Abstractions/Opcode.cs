@@ -11,6 +11,7 @@ public enum Opcode
     Less,
     LessOrEqual,
     Equal,
+    NotEqual,
     Greater,
     GreaterOrEqual,
     Push,
