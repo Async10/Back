@@ -128,9 +128,20 @@ public partial class AssemblyGenerator : IAssemblyGenerator
                 Opcode.Mem => this.GenerateMem(sb),
                 Opcode.Store => this.GenerateStore(sb),
                 Opcode.Fetch => this.GenerateFetch(sb),
+                Opcode.Syscall3 => this.GenerateSyscall3(sb),
                 _ => throw new ArgumentException($"Operation {op.Code} not supported")
             }
         };
+
+    private StringBuilder GenerateSyscall3(StringBuilder sb)
+    {
+        sb.AppendLine("    pop rdx");
+        sb.AppendLine("    pop rsi");
+        sb.AppendLine("    pop rdi");
+        sb.AppendLine("    pop rax");
+        sb.AppendLine("    syscall");
+        return sb;
+    }
 
     private StringBuilder GenerateFetch(StringBuilder sb)
     {

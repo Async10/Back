@@ -139,6 +139,7 @@ public class Parser : IParser
         { Value: "mem" } => new Operation(Opcode.Mem, token.Location),
         { Value: "!" } => new Operation(Opcode.Store, token.Location),
         { Value: "@" } => new Operation(Opcode.Fetch, token.Location),
+        { Value: "syscall3" } => new Operation(Opcode.Syscall3, token.Location),
         _ => throw new ArgumentException($"{token.Location} Undefined token '{token.Value}'"),
     };
 }

@@ -30,4 +30,5 @@ public enum Opcode
     Mem,
     Store,
     Fetch,
+    Syscall3,
 }
