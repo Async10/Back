@@ -6,21 +6,19 @@ using Back.Shared.Abstractions;
 
 public class Lexer : ILexer
 {
-    private const string EndOfLineCommentSymbol = "#";
+    private const char EndOfLineCommentSymbol = '#';
 
     public IEnumerable<Token> LexFile(SourceFile file)
     {
         foreach ((int row, string line) in file.Lines.Enumerate())
-        {
-            foreach ((int col, string value) in this.LexLine(line.Split(EndOfLineCommentSymbol)[0]))
+            foreach ((int col, string value) in this.LexLine(line))
                 yield return this.CreateToken(value, new Location(file.Path, row + 1, col + 1));
-        }
     }
 
     private IEnumerable<(int col, string word)> LexLine(string line)
     {
         int col = this.FindNonWhiteSpace(line);
-        while (col != -1)
+        while (col != -1 && line[col] != EndOfLineCommentSymbol)
         {
             int end = this.FindEnd(line.Substring(col));
             if (end == -1)
@@ -40,37 +38,29 @@ public class Lexer : ILexer
     private int FindEnd(string text)
     {
         if (text.StartsWith("'"))
-        {
             return this.FindIndex(
                 text,
-                (ch, idx, text) =>
-                    char.IsWhiteSpace(ch) && text[idx - 1] == '\'' && idx != 1);
-        }
+                (ch, idx, text) => (idx > 1 && this.IsWordEnd(ch) && text[idx - 1] == '\'' && text[idx - 2] != '\\'));
 
         if (text.StartsWith('"'))
-        {
             return this.FindIndex(
                 text,
-                (ch, idx, text) =>
-                    char.IsWhiteSpace(ch) && text[idx - 1] == '"' && idx != 1);
-        }
+                (ch, idx, text) => (idx > 1 && this.IsWordEnd(ch) && text[idx - 1] == '"' && text[idx - 2] != '\\'));
 
-        return this.FindWhiteSpace(text);
+        return this.FindIndex(text, this.IsWordEnd);
     }
+
+    private bool IsWordEnd(char ch) =>
+        char.IsWhiteSpace(ch) || ch == EndOfLineCommentSymbol;
 
     private int FindNonWhiteSpace(string text) =>
         this.FindIndex(text, ch => !Char.IsWhiteSpace(ch));
 
-    private int FindWhiteSpace(string text) =>
-        this.FindIndex(text, Char.IsWhiteSpace);
-
     private int FindIndex(string text, Func<char, int, string, bool> predicate)
     {
         for (int idx = 0; idx < text.Length; idx++)
-        {
             if (predicate(text[idx], idx, text))
                 return idx;
-        }
 
         return -1;
     }
@@ -83,9 +73,7 @@ public class Lexer : ILexer
         if (word.StartsWith("'"))
         {
             if (char.TryParse(this.Unescape(word), out var aChar))
-            {
                 return new IntToken(aChar, location);
-            }
 
             throw new ArgumentException($"{location} {word} is not a char");
         }
@@ -93,17 +81,13 @@ public class Lexer : ILexer
         if (word.StartsWith('"'))
         {
             if (word.EndsWith('"'))
-            {
                 return new StringToken(this.Unescape(word), location);
-            }
 
             throw new ArgumentException($"{location} Unclosed string literal");
         }
 
         if (int.TryParse(word, out var i))
-        {
             return new IntToken(i, location);
-        }
 
         return new WordToken(word, location);
     }

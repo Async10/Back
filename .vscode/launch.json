@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/src/Back/bin/Debug/net6.0/Back.dll",
-            "args": ["--run", "${workspaceFolder}/examples/arithmetic.back"],
+            "args": ["--run", "${workspaceFolder}/examples/string.back"],
             "cwd": "${workspaceFolder}/src/Back",
             "console": "externalTerminal",
             "stopAtEntry": false
