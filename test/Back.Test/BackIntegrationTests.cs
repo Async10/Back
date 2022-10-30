@@ -23,6 +23,7 @@ public class BackIntegrationTests
     [InlineData("mem.back")]
     [InlineData("syscall3.back")]
     [InlineData("string.back")]
+    [InlineData("proc.back")]
     public void RunsIntegrationTests(string fileName)
     {
         var process = this.StartCompiler(fileName);

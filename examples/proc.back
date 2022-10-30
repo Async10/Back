@@ -1,0 +1,45 @@
+# fib (n -- n)
+#
+# Consumes a number `n` from the stack and pushes the nth number
+# of the fibanocci series back on to the stack.
+#
+proc fib
+    # write 0 into memory with offset 0
+    mem 0 + 0 !
+
+    # write 1 into memory with offset 1
+    mem 1 + 1 !
+
+    # duplicate n
+    # test if n is greater than 1
+    # execute loop if condition is true
+    begin dup 1 > while
+
+        # fetch value from memory with offset 1
+        # fetch value from memory with offset 0
+        # add values
+        # store result into memory with offset 2
+        mem 2 + mem 1 + @ mem 0 + @ + !
+
+        # fetch value from memory with offset 1
+        # store value into memory with offset 0
+        mem 0 + mem 1 + @ !
+
+        # fetch value from memory with offset 2
+        # store value into memory with offset 1
+        mem 1 + mem 2 + @ !
+
+        # decrement n by one
+        1 -
+
+    # jump to begin
+    end
+
+    # fetch value from memory with offset n
+    mem + @
+end
+
+# push 7 to stack
+# call fib
+# dump top of the stack
+7 fib .

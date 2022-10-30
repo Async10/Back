@@ -31,4 +31,7 @@ public enum Opcode
     Store,
     Fetch,
     Syscall3,
+    Proc,
+    Return,
+    Call,
 }

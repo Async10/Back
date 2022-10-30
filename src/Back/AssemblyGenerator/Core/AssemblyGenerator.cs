@@ -8,6 +8,9 @@ using Back.Shared.Abstractions;
 public partial class AssemblyGenerator : IAssemblyGenerator
 {
     private const int MemoryCapacity = 640_000;
+
+    private const int RetStackCapacity = 4_096;
+
     private const byte True = 1;
 
     private readonly IList<string> stringLiterals = new List<string>();
@@ -22,6 +25,8 @@ public partial class AssemblyGenerator : IAssemblyGenerator
 
         sb.AppendLine("global _start");
         sb.AppendLine("_start:");
+        sb.AppendLine("mov rax, ret_stack_end");
+        sb.AppendLine("mov [ret_stack_rsp], rax");
 
         foreach (var op in operations)
             this.Generate(op, sb);
@@ -37,6 +42,9 @@ public partial class AssemblyGenerator : IAssemblyGenerator
             sb.AppendLine($"str_{idx}: db {string.Join(',', this.ConvertToHexValues(stringLiteral))}");
 
         sb.AppendLine( "segment .bss");
+        sb.AppendLine($"ret_stack_rsp: resq 1");
+        sb.AppendLine($"ret_stack: resb {RetStackCapacity}");
+        sb.AppendLine($"ret_stack_end:");
         sb.AppendLine($"mem: resb {MemoryCapacity}");
 
         return sb.ToString();
@@ -104,46 +112,78 @@ public partial class AssemblyGenerator : IAssemblyGenerator
             IntOperation intOp => intOp.Code switch
             {
                 Opcode.Push => this.GeneratePushInt(sb, intOp.Value),
-                _ => throw new ArgumentException($"{intOp.Location} IntOperation {intOp.Code} not supported")
+                _           => throw new ArgumentException($"{intOp.Location} IntOperation {intOp.Code} not supported")
             },
             StringOperation stringOp => stringOp.Code switch
             {
                 Opcode.Push => this.GeneratePushString(sb, stringOp.Value),
-                _ => throw new ArgumentException($"{stringOp.Location} StingOperation {stringOp.Code} not suppoerted")
+                _           => throw new ArgumentException($"{stringOp.Location} StingOperation {stringOp.Code} not suppoerted")
             },
-            EndOperation endOp => this.GenerateEnd(endOp, sb),
-            ElseOperation elseOp => this.GenerateElse(elseOp, sb),
-            IfOperation ifOp => this.GenerateIf(ifOp, sb),
+            EndOperation endOp     => this.GenerateEnd(endOp, sb),
+            ElseOperation elseOp   => this.GenerateElse(elseOp, sb),
+            IfOperation ifOp       => this.GenerateIf(ifOp, sb),
             BeginOperation beginOp => this.GenerateBegin(beginOp, sb),
             WhileOperation whileOp => this.GenerateWhile(whileOp, sb),
+            ProcOperation procOp   => this.GenerateProc(procOp, sb),
+            CallOperation callOp   => this.GenerateCall(callOp, sb),
+            ReturnOperation retOp  => this.GenerateReturn(retOp, sb),
             _ => op.Code switch
             {
-                Opcode.Plus => this.GeneratePlus(sb),
-                Opcode.Sub => this.GenerateSub(sb),
-                Opcode.Mul => this.GenerateMul(sb),
-                Opcode.Div => this.GenerateDiv(sb),
-                Opcode.DivMod => this.GenerateDivMod(sb),
-                Opcode.Mod => this.GenerateMod(sb),
-                Opcode.Less => this.GenerateLess(sb),
-                Opcode.LessOrEqual => this.GenerateLessOrEqual(sb),
-                Opcode.Equal => this.GenerateEqual(sb),
-                Opcode.NotEqual => this.GenerateNotEqual(sb),
-                Opcode.Greater => this.GenerateGreater(sb),
+                Opcode.Plus           => this.GeneratePlus(sb),
+                Opcode.Sub            => this.GenerateSub(sb),
+                Opcode.Mul            => this.GenerateMul(sb),
+                Opcode.Div            => this.GenerateDiv(sb),
+                Opcode.DivMod         => this.GenerateDivMod(sb),
+                Opcode.Mod            => this.GenerateMod(sb),
+                Opcode.Less           => this.GenerateLess(sb),
+                Opcode.LessOrEqual    => this.GenerateLessOrEqual(sb),
+                Opcode.Equal          => this.GenerateEqual(sb),
+                Opcode.NotEqual       => this.GenerateNotEqual(sb),
+                Opcode.Greater        => this.GenerateGreater(sb),
                 Opcode.GreaterOrEqual => this.GenerateGreaterOrEqual(sb),
-                Opcode.Drop => this.GenerateDrop(sb),
-                Opcode.Dup => this.GenerateDup(sb),
-                Opcode.Over => this.GenerateOver(sb),
-                Opcode.Swap => this.GenerateSwap(sb),
-                Opcode.Rot => this.GenerateRot(sb),
-                Opcode.Dump => this.GenerateDump(sb),
-                Opcode.Emit => this.GenerateEmit(sb),
-                Opcode.Mem => this.GenerateMem(sb),
-                Opcode.Store => this.GenerateStore(sb),
-                Opcode.Fetch => this.GenerateFetch(sb),
-                Opcode.Syscall3 => this.GenerateSyscall3(sb),
-                _ => throw new ArgumentException($"{op.Location} Operation {op.Code} for value not supported")
+                Opcode.Drop           => this.GenerateDrop(sb),
+                Opcode.Dup            => this.GenerateDup(sb),
+                Opcode.Over           => this.GenerateOver(sb),
+                Opcode.Swap           => this.GenerateSwap(sb),
+                Opcode.Rot            => this.GenerateRot(sb),
+                Opcode.Dump           => this.GenerateDump(sb),
+                Opcode.Emit           => this.GenerateEmit(sb),
+                Opcode.Mem            => this.GenerateMem(sb),
+                Opcode.Store          => this.GenerateStore(sb),
+                Opcode.Fetch          => this.GenerateFetch(sb),
+                Opcode.Syscall3       => this.GenerateSyscall3(sb),
+                _                     => throw new ArgumentException($"{op.Location} Can't generate assembly for unknown operation {op.Code}")
             }
         };
+    }
+
+    private StringBuilder GenerateReturn(ReturnOperation op, StringBuilder sb)
+    {
+        sb.AppendLine( "    mov rax, rsp");
+        sb.AppendLine( "    mov rsp, [ret_stack_rsp]");
+        sb.AppendLine( "    ret");
+        sb.AppendLine($"addr_{op.ReturnAddress}:");
+        return sb;
+    }
+
+    private StringBuilder GenerateCall(CallOperation op, StringBuilder sb)
+    {
+        sb.AppendLine($"    mov rax, rsp");
+        sb.AppendLine($"    mov rsp, [ret_stack_rsp]");
+        sb.AppendLine($"    call addr_{op.ProcAddress}");
+        sb.AppendLine( "    mov [ret_stack_rsp], rsp");
+        sb.AppendLine( "    mov rsp, rax");
+        // sb.AppendLine($"addr_{op.CallAddress}:");
+        return sb;
+    }
+
+    private StringBuilder GenerateProc(ProcOperation op, StringBuilder sb)
+    {
+        sb.AppendLine($"    jmp addr_{op.ReturnAddress}");
+        sb.AppendLine($"addr_{op.ProcAddress}:");
+        sb.AppendLine($"    mov [ret_stack_rsp], rsp");
+        sb.AppendLine($"    mov rsp, rax");
+        return sb;
     }
 
     private StringBuilder GeneratePushString(StringBuilder sb, string value)
