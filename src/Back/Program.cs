@@ -62,7 +62,7 @@ class Program
                 services
                     .AddIO(logger =>
                     {
-                        logger.Quiet = true;
+                        logger.Quiet = args.Quiet;
                     })
                     .AddLexer()
                     .AddParser()
