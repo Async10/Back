@@ -24,6 +24,7 @@ public class BackIntegrationTests
     [InlineData("syscall3.back")]
     [InlineData("string.back")]
     [InlineData("proc.back")]
+    [InlineData("bitwise-operations.back")]
     public void RunsIntegrationTests(string fileName)
     {
         var process = this.StartCompiler(fileName);

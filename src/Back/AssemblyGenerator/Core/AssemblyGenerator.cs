@@ -141,6 +141,10 @@ public partial class AssemblyGenerator : IAssemblyGenerator
                 Opcode.NotEqual       => this.GenerateNotEqual(sb),
                 Opcode.Greater        => this.GenerateGreater(sb),
                 Opcode.GreaterOrEqual => this.GenerateGreaterOrEqual(sb),
+                Opcode.RShift         => this.GenerateRShift(sb),
+                Opcode.LShift         => this.GenerateLShift(sb),
+                Opcode.BitwiseAnd     => this.GenerateBitwiseAnd(sb),
+                Opcode.BitwiseOr      => this.GenerateBitwiseOr(sb),
                 Opcode.Drop           => this.GenerateDrop(sb),
                 Opcode.Dup            => this.GenerateDup(sb),
                 Opcode.Over           => this.GenerateOver(sb),
@@ -155,6 +159,42 @@ public partial class AssemblyGenerator : IAssemblyGenerator
                 _                     => throw new ArgumentException($"{op.Location} Can't generate assembly for unknown operation {op.Code}")
             }
         };
+    }
+
+    private StringBuilder GenerateBitwiseOr(StringBuilder sb)
+    {
+        sb.AppendLine("    pop rbx");
+        sb.AppendLine("    pop rax");
+        sb.AppendLine("    or rax, rbx");
+        sb.AppendLine("    push rax");
+        return sb;
+    }
+
+    private StringBuilder GenerateBitwiseAnd(StringBuilder sb)
+    {
+        sb.AppendLine("    pop rbx");
+        sb.AppendLine("    pop rax");
+        sb.AppendLine("    and rax, rbx");
+        sb.AppendLine("    push rax");
+        return sb;
+    }
+
+    private StringBuilder GenerateLShift(StringBuilder sb)
+    {
+        sb.AppendLine("    pop rcx");
+        sb.AppendLine("    pop rax");
+        sb.AppendLine("    shl rax, cl");
+        sb.AppendLine("    push rax");
+        return sb;
+    }
+
+    private StringBuilder GenerateRShift(StringBuilder sb)
+    {
+        sb.AppendLine("    pop rcx");
+        sb.AppendLine("    pop rax");
+        sb.AppendLine("    shr rax, cl");
+        sb.AppendLine("    push rax");
+        return sb;
     }
 
     private StringBuilder GenerateReturn(ReturnOperation op, StringBuilder sb)
