@@ -10,4 +10,4 @@ Back compiles to x86-64 assembly, which again is compiled to a statically-linked
 
 Thanks to [its zxc](https://github.com/singiamtel) for the awesome name.
 
-Another big thank you goes to [tsoding](https://github.com/tsoding) the creator of [Porth](https://gitlab.com/tsoding/porth), another Forth-like programming language. This whole project is heavily inspired by Porth and without it, Back wouldn't exist.
+Another big thank you goes to [Tsoding](https://github.com/tsoding) the creator of [Porth](https://gitlab.com/tsoding/porth), another Forth-like programming language. This whole project is heavily inspired by Porth and without it, Back wouldn't exist.
