@@ -3,14 +3,10 @@
 - [ ] start documenting back
 - [x] add conditionals
 - [x] add loops
-- [ ] reading and writing to memory
-- [ ] add strings
-- [ ] add procedures
+- [x] reading and writing to memory
+- [x] add strings
+- [x] add procedures
 - [ ] make source code resuable with icludes
-- [ ] support writing to and reading from memory
-- [ ] support command line arguments
-- [ ] support reading from stdin
+- [ ] add support for command line arguments
+- [ ] add support for reading from stdin
 - [ ] add variables
-- [ ] add unit tests
-- [ ] add signed integers?
-- [ ] add floating point numbers?
