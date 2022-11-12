@@ -1,0 +1,64 @@
+proc BOARD_CAP   50            end
+proc GENERATIONS BOARD_CAP 1 - end
+proc RULE        110           end
+
+# Print a string to the console.
+# >>> "Hello, World!\n" print
+proc print
+    1 rot rot 1 rot rot syscall3
+end
+
+proc board_ptr mem end
+
+proc main
+
+    # seed board
+    board_ptr BOARD_CAP 1 - + 1 !
+
+    0 begin dup GENERATIONS < while
+        0 begin dup BOARD_CAP < while
+
+            # print cell
+            dup board_ptr + @ if "*" else " " end print
+
+            # increment counter
+            1 +
+        end
+
+        # drop counter
+        drop
+
+        "\n" print
+
+        # get first two bits of pattern window
+        board_ptr @ 1 lshift board_ptr 1 + @ or
+
+        1 begin dup BOARD_CAP 1 - < while
+            # advance pattern window
+            dup 1 board_ptr + + @ rot 1 lshift or 7 and
+
+            # push pointer of current cell
+            swap dup board_ptr +
+
+            # push next state of cell by applying rule to pattern
+            rot RULE over rshift 1 and
+
+            # store next state of cell
+            rot swap !
+
+            # incerement counter
+            swap 1 +
+        end
+
+        # drop counter and pattern window
+        drop drop
+
+        # incerement counter
+        1 +
+    end
+
+    # drop counter
+    drop
+end
+
+main
