@@ -1,0 +1,34 @@
+#
+# Multiples of 3 or 5
+#
+# Problem 1
+#
+# If we list the natural numbers below 10 that are multiples of 3 or 5 we get 3,
+# 5, 6 and 9. The sum of these multiples is 23. Find the sum of all the
+# multiples of 3 or 5 below 1000.
+#
+
+proc LIMIT 1000 end
+
+proc sum_multiple
+    swap
+    over
+    +
+    swap
+end
+
+proc is_multiple_of_3_or_5
+    dup  3 % 0 ==
+    over 5 % 0 ==
+    or
+end
+
+0 3 begin dup LIMIT < while
+    is_multiple_of_3_or_5 if
+        sum_multiple
+    end
+
+    1 +
+end
+
+drop .

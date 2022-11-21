@@ -133,6 +133,8 @@ $RECYCLE.BIN/
 
 _NCrunch*
 
-examples/*
-!examples/*.back
+examples/**/*
+!examples/**/
+!examples/**/*.back
+
 *.py
