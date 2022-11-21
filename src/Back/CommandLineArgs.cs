@@ -13,8 +13,7 @@ public record CommandLineArgs(string ProgramName, string FilePath, bool Run, boo
     public static CommandLineArgs Parse(string[] args)
     {
         var seed = new CommandLineArgs(args[0], string.Empty, false, false);
-        return args
-            .Skip(1)  // skip program name
+        return Prepare(args)
             .Aggregate<string, CommandLineArgs>(
                 seed,
                 (res, arg) =>
@@ -22,6 +21,29 @@ public record CommandLineArgs(string ProgramName, string FilePath, bool Run, boo
                     var reducer = Reducers.GetValueOrDefault(arg, GetFilePathReducer);
                     return reducer(res, arg);
                 });
+    }
+
+    private static IEnumerable<string> Prepare(IEnumerable<string> args)
+    {
+        return args
+            .Skip(1)  // skip program name
+            .SelectMany(arg =>
+            {
+                var res = new List<string>();
+                if (arg.StartsWith("--") || !arg.StartsWith("-"))
+                {
+                    res.Add(arg);
+                }
+                else
+                {
+                    foreach (var opt in arg.Skip(1))
+                    {
+                        res.Add($"-{opt}");
+                    }
+                }
+
+                return res;
+            });
     }
 
     private static CommandLineArgs GetFilePathReducer(CommandLineArgs r, string arg) =>
