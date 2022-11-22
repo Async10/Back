@@ -73,7 +73,7 @@ public class Lexer : ILexer
         if (word.StartsWith("'"))
         {
             if (char.TryParse(this.Unescape(word), out var aChar))
-                return new IntToken(aChar, location);
+                return new LongToken(aChar, location);
 
             throw new ArgumentException($"{location} {word} is not a char");
         }
@@ -86,8 +86,8 @@ public class Lexer : ILexer
             throw new ArgumentException($"{location} Unclosed string literal");
         }
 
-        if (int.TryParse(word, out var i))
-            return new IntToken(i, location);
+        if (long.TryParse(word, out var i))
+            return new LongToken(i, location);
 
         return new WordToken(word, location);
     }

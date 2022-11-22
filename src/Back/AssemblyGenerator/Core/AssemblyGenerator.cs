@@ -109,10 +109,10 @@ public partial class AssemblyGenerator : IAssemblyGenerator
         sb.AppendLine($"    ; --- {op.Code} ---");
         return op switch
         {
-            IntOperation intOp => intOp.Code switch
+            LongOperation longOp => longOp.Code switch
             {
-                Opcode.Push => this.GeneratePushInt(sb, intOp.Value),
-                _           => throw new ArgumentException($"{intOp.Location} IntOperation {intOp.Code} not supported")
+                Opcode.Push => this.GeneratePushLong(sb, longOp.Value),
+                _           => throw new ArgumentException($"{longOp.Location} IntOperation {longOp.Code} not supported")
             },
             StringOperation stringOp => stringOp.Code switch
             {
@@ -447,8 +447,12 @@ public partial class AssemblyGenerator : IAssemblyGenerator
         return sb;
     }
 
-    private StringBuilder GeneratePushInt(StringBuilder sb, int value) =>
-        sb.AppendLine($"    push {value}");
+    private StringBuilder GeneratePushLong(StringBuilder sb, long value)
+    {
+        sb.AppendLine($"    mov rax, {value}");
+        sb.AppendLine($"    push rax");
+        return sb;
+    }
 
     private IEnumerable<string> ConvertToHexValues(string text) =>
         Encoding.UTF8.GetBytes(text).Select(b => $"0x{b.ToString("X2")}");

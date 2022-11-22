@@ -4,7 +4,7 @@ using Back.Shared.Abstractions;
 
 public abstract record Token(Location Location);
 
-public record IntToken(int Value, Location Location)
+public record LongToken(long Value, Location Location)
     : Token(Location);
 
 public record WordToken(string Value, Location Location)

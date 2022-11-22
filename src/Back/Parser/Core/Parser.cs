@@ -152,7 +152,7 @@ public class Parser : IParser
     {
         return token switch
         {
-            IntToken intToken => this.ParseIntToken(intToken),
+            LongToken intToken => this.ParseLongToken(intToken),
             StringToken stringToken => this.ParseStringToken(stringToken),
             WordToken wordToken => this.ParseWordToken(wordToken, tokenQueue),
             _ => throw new ArgumentException($"{token.Location} Undefined token"),
@@ -162,8 +162,8 @@ public class Parser : IParser
     private Operation ParseStringToken(StringToken token) =>
         new StringOperation(Opcode.Push, token.Location, token.Value);
 
-    private Operation ParseIntToken(IntToken token) =>
-        new IntOperation(Opcode.Push, token.Location, token.Value);
+    private Operation ParseLongToken(LongToken token) =>
+        new LongOperation(Opcode.Push, token.Location, token.Value);
 
     private Operation ParseWordToken(WordToken token, Queue<Token> tokenQueue) => token switch
     {

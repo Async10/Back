@@ -4,7 +4,7 @@ namespace Back.Parser.Abstractions;
 
 public record Operation(Opcode Code, Location Location);
 
-public record IntOperation(Opcode Code, Location Location, int Value) : Operation(Code, Location);
+public record LongOperation(Opcode Code, Location Location, long Value) : Operation(Code, Location);
 
 public record StringOperation(Opcode Code, Location Location, string Value) : Operation(Code, Location);
 
